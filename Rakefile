@@ -7,9 +7,7 @@ require 'hoe'
 windows = RUBY_PLATFORM =~ /(mswin|mingw)/i
 java    = RUBY_PLATFORM =~ /java/
 
-GENERATED_PARSER    = "lib/nokogiri/css/parser.rb"
-GENERATED_TOKENIZER = "lib/nokogiri/css/tokenizer.rb"
-CROSS_DIR           = File.join(File.dirname(__FILE__), 'tmp', 'cross')
+CROSS_DIR = File.join(File.dirname(__FILE__), 'tmp', 'cross')
 
 EXTERNAL_JAVA_LIBRARIES = %w{isorelax jing nekohtml nekodtd xercesImpl}.map{|x| "lib/#{x}.jar"}
 JAVA_EXT = "lib/nokogiri/nokogiri.jar"
@@ -17,7 +15,10 @@ JRUBY_HOME = Config::CONFIG['prefix']
 
 # Make sure hoe-debugging is installed
 Hoe.plugin :debugging
+Hoe.plugin :compiler
+Hoe.plugin :racc
 Hoe.plugin :git
+Hoe.plugin :isolate
 
 HOE = Hoe.spec 'nokogiri' do
   developer('Aaron Patterson', 'aaronp@rubyforge.org')
@@ -29,8 +30,6 @@ HOE = Hoe.spec 'nokogiri' do
     'lib/nokogiri/*.{o,so,bundle,a,log,dll}',
     'lib/nokogiri/nokogiri.rb',
     'lib/nokogiri/1.{8,9}',
-    GENERATED_PARSER,
-    GENERATED_TOKENIZER,
     'cross',
   ]
 
@@ -99,7 +98,7 @@ namespace :java do
   task :clean_all => ["java:clean_classes", "java:clean_jar"]
   
   desc "Build a gem targetted for JRuby"
-  task :gem => ['java:spec', GENERATED_PARSER, GENERATED_TOKENIZER, :build] do
+  task :gem => ['java:spec', :parser, :lexer, :build] do
     raise "ERROR: please run this task under jruby" unless java
     system "gem build nokogiri.gemspec"
     FileUtils.mkdir_p "pkg"
@@ -109,7 +108,7 @@ namespace :java do
   task :spec do
     File.open("#{HOE.name}.gemspec", 'w') do |f|
       HOE.spec.platform = 'java'
-      HOE.spec.files += [GENERATED_PARSER, GENERATED_TOKENIZER, JAVA_EXT] + EXTERNAL_JAVA_LIBRARIES
+      HOE.spec.files += [JAVA_EXT] + EXTERNAL_JAVA_LIBRARIES
       HOE.spec.extensions = []
       f.write(HOE.spec.to_ruby)
     end
@@ -130,7 +129,7 @@ end
 
 namespace :gem do
   namespace :dev do
-    task :spec => [ GENERATED_PARSER, GENERATED_TOKENIZER ] do
+    task :spec => [ :parser, :lexer ] do
       File.open("#{HOE.name}.gemspec", 'w') do |f|
         HOE.spec.version = "#{HOE.version}.#{Time.now.strftime("%Y%m%d%H%M%S")}"
         f.write(HOE.spec.to_ruby)
@@ -139,24 +138,6 @@ namespace :gem do
   end
 
   task :spec => ['gem:dev:spec']
-end
-
-file GENERATED_PARSER => "lib/nokogiri/css/parser.y" do |t|
-  begin
-    racc = Config::CONFIG['target_os'] =~ /mswin32/ ? '' : `which racc`.strip
-    racc = "#{::Config::CONFIG['bindir']}/racc" if racc.empty?
-    sh "#{racc} -l -o #{t.name} #{t.prerequisites.first}"
-  rescue
-    abort "need racc, sudo gem install racc"
-  end
-end
-
-file GENERATED_TOKENIZER => "lib/nokogiri/css/tokenizer.rex" do |t|
-  begin
-    sh "rex --independent -o #{t.name} #{t.prerequisites.first}"
-  rescue
-    abort "need rexical, sudo gem install rexical"
-  end
 end
 
 require 'tasks/test'
@@ -175,28 +156,6 @@ end
 
 # required_ruby_version
 
-# Only do this on unix, since we can't build on windows
-unless windows || java
-  [:compile, :check_manifest].each do |task_name|
-    Rake::Task[task_name].prerequisites << GENERATED_PARSER
-    Rake::Task[task_name].prerequisites << GENERATED_TOKENIZER
-  end
-
-  Rake::Task[:test].prerequisites << :compile
-  if Hoe.plugins.include?(:debugging)
-    ['valgrind', 'valgrind:mem', 'valgrind:mem0'].each do |task_name|
-      Rake::Task["test:#{task_name}"].prerequisites << :compile
-    end
-  end
-else
-  [:test, :check_manifest].each do |task_name|
-    if Rake::Task[task_name]
-      Rake::Task[task_name].prerequisites << GENERATED_PARSER
-      Rake::Task[task_name].prerequisites << GENERATED_TOKENIZER
-    end
-  end
-end
-
 namespace :install do
   desc "Install rex and racc for development"
   task :deps => %w(rexical racc)
@@ -211,7 +170,7 @@ namespace :install do
 end
 
 namespace :rip do
-  task :install => [GENERATED_TOKENIZER, GENERATED_PARSER]
+  task :install => [:parser, :lexer]
 end
 
 # vim: syntax=Ruby
