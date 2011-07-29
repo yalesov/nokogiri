@@ -1,0 +1,17 @@
+http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=546843
+
+--- a/lib/nokogiri/version.rb
++++ b/lib/nokogiri/version.rb
+@@ -28,11 +28,7 @@ module Nokogiri
+     def warnings
+       return [] unless libxml2?
+ 
+-      if compiled_parser_version != loaded_parser_version
+-        ["Nokogiri was built against LibXML version #{compiled_parser_version}, but has dynamically loaded #{loaded_parser_version}"]
+-      else
+-        []
+-      end
++      []
+     end
+ 
+     def to_hash

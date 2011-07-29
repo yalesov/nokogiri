@@ -4,10 +4,10 @@ Priority: optional
 Maintainer: Debian Ruby Extras Maintainers <pkg-ruby-extras-maintainers@lists.alioth.debian.org>
 Uploaders: Lucas Nussbaum <lucas@debian.org>
 DM-Upload-Allowed: yes
-Build-Depends: debhelper (>= 7.0.50~), gem2deb (>= 0.2.6~), libxml2-dev, libxslt-dev
+Build-Depends: debhelper (>= 7.0.50~), gem2deb (>= 0.2.6~), libxml2-dev, libxslt-dev, ruby-minitest
 Standards-Version: 3.9.2
-#Vcs-Git: git://git.debian.org/pkg-ruby-extras/ruby-nokogiri.git
-#Vcs-Browser: http://git.debian.org/?p=pkg-ruby-extras/ruby-nokogiri.git;a=summary
+Vcs-Git: git://git.debian.org/pkg-ruby-extras/ruby-nokogiri.git
+Vcs-Browser: http://git.debian.org/?p=pkg-ruby-extras/ruby-nokogiri.git;a=summary
 Homepage: http://nokogiri.org
 XS-Ruby-Versions: all
 
@@ -15,10 +15,44 @@ Package: ruby-nokogiri
 Architecture: any
 XB-Ruby-Versions: ${ruby:Versions}
 Depends: ${shlibs:Depends}, ${misc:Depends}, ruby | ruby-interpreter
-# racc (>= 1.4.6, development), rexical (>= 1.0.5, development), rake-compiler (>= 0.7.9, development), minitest (~> 2.2.2, development), mini_portile (>= 0.2.2, development), hoe-debugging (>= 0, development), hoe-git (>= 0, development), hoe-gemspec (>= 0, development), hoe-bundler (>= 0, development), hoe (>= 2.9.4, development)
-Description: Nokogiri (鋸) is an HTML, XML, SAX, and Reader parser
- Nokogiri (鋸) is an HTML, XML, SAX, and Reader parser.  Among Nokogiri's
- many features is the ability to search documents via XPath or CSS3 selectors.
- .
- XML is like violence - if it doesn’t solve your problems, you are not using
- enough of it.
+Replaces: libnokogiri-ruby (<< 1.5.0-1~), libnokogiri-ruby1.8 (<< 1.5.0-1~), libnokogiri-ruby1.9.1 (<< 1.5.0-1~), libnokogiri-ruby1.9 (<< 1.5.0-1~)
+Breaks: libnokogiri-ruby (<< 1.5.0-1~), libnokogiri-ruby1.8 (<< 1.5.0-1~), libnokogiri-ruby1.9.1 (<< 1.5.0-1~), libnokogiri-ruby1.9 (<< 1.5.0-1~)
+Provides: libnokogiri-ruby, libnokogiri-ruby1.8, libnokogiri-ruby1.9.1, libnokogiri-ruby1.9
+Description: HTML, XML, SAX, and Reader parser for Ruby
+ Nokogiri (鋸) is an HTML, XML, SAX, and Reader parser.  It is able to
+ search documents via XPath or CSS3 selectors, and is a drop-in replacement
+ for Hpricot (though not bug for bug).
+
+# Transitional packages
+Package: libnokogiri-ruby
+Section: oldlibs
+Architecture: all
+Depends: ${misc:Depends}, ruby-nokogiri
+Description: Transitional package for ruby-nokogiri
+ This is a transitional package to ease upgrades to the ruby-nokogiri
+ package. It can safely be removed.
+
+Package: libnokogiri-ruby1.8
+Section: oldlibs
+Architecture: all
+Depends: ${misc:Depends}, ruby-nokogiri
+Description: Transitional package for ruby-nokogiri
+ This is a transitional package to ease upgrades to the ruby-nokogiri
+ package. It can safely be removed.
+
+Package: libnokogiri-ruby1.9.1
+Section: oldlibs
+Architecture: all
+Depends: ${misc:Depends}, ruby-nokogiri
+Description: Transitional package for ruby-nokogiri
+ This is a transitional package to ease upgrades to the ruby-nokogiri
+ package. It can safely be removed.
+
+Package: libnokogiri-ruby1.9
+Section: oldlibs
+Architecture: all
+Depends: ${misc:Depends}, ruby-nokogiri
+Description: Transitional package for ruby-nokogiri
+ This is a transitional package to ease upgrades to the ruby-nokogiri
+ package. It can safely be removed.
+
