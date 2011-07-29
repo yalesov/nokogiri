@@ -1,0 +1,5 @@
+ruby-nokogiri (1.5.0-1) UNRELEASED; urgency=low
+
+  * Initial release (Closes: #nnnn)
+
+ -- Lucas Nussbaum <lucas@debian.org>  Fri, 29 Jul 2011 18:50:38 +0200
