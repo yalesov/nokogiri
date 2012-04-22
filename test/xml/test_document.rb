@@ -51,11 +51,27 @@ module Nokogiri
         assert_equal @xml, txt.document
       end
 
+      def test_create_text_node_with_block
+        @xml.create_text_node 'foo' do |txt|
+          assert_instance_of Nokogiri::XML::Text, txt
+          assert_equal 'foo', txt.text
+          assert_equal @xml, txt.document
+        end
+      end
+
       def test_create_element
         elm = @xml.create_element('foo')
         assert_instance_of Nokogiri::XML::Element, elm
         assert_equal 'foo', elm.name
         assert_equal @xml, elm.document
+      end
+
+      def test_create_element_with_block
+        @xml.create_element('foo') do |elm|
+          assert_instance_of Nokogiri::XML::Element, elm
+          assert_equal 'foo', elm.name
+          assert_equal @xml, elm.document
+        end
       end
 
       def test_create_element_with_attributes
@@ -70,6 +86,11 @@ module Nokogiri
         assert_equal 'http://tenderlovemaking.com', elm.namespaces['xmlns:foo']
       end
 
+      def test_create_element_with_hyphenated_namespace
+        elm = @xml.create_element('foo',:'xmlns:SOAP-ENC' => 'http://tenderlovemaking.com')
+        assert_equal 'http://tenderlovemaking.com', elm.namespaces['xmlns:SOAP-ENC']
+      end
+
       def test_create_element_with_content
         elm = @xml.create_element('foo',"needs more xml/violence")
         assert_equal "needs more xml/violence", elm.content
@@ -79,6 +100,26 @@ module Nokogiri
         cdata = @xml.create_cdata("abc")
         assert_instance_of Nokogiri::XML::CDATA, cdata
         assert_equal "abc", cdata.content
+      end
+
+      def test_create_cdata_with_block
+        @xml.create_cdata("abc") do |cdata|
+          assert_instance_of Nokogiri::XML::CDATA, cdata
+          assert_equal "abc", cdata.content
+        end
+      end
+
+      def test_create_comment
+        comment = @xml.create_comment("abc")
+        assert_instance_of Nokogiri::XML::Comment, comment
+        assert_equal "abc", comment.content
+      end
+
+      def test_create_comment_with_block
+        @xml.create_comment("abc") do |comment|
+          assert_instance_of Nokogiri::XML::Comment, comment
+          assert_equal "abc", comment.content
+        end
       end
 
       def test_pp
@@ -202,6 +243,13 @@ module Nokogiri
         assert_raises(RuntimeError) do
           @xml << Node.new('foo', @xml)
         end
+      end
+
+      def test_add_child_with_string
+        doc = Nokogiri::XML::Document.new
+        doc.add_child "<div>quack!</div>"
+        assert_equal 1, doc.root.children.length
+        assert_equal "quack!", doc.root.children.first.content
       end
 
       def test_move_root_to_document_with_no_root
