@@ -13,3 +13,12 @@
 
 %:
 	dh $@ --buildsystem=ruby --with ruby
+
+override_dh_installman:
+	mkdir man
+	pod2man --center "" --release "" --name NOKOGIRI --utf8 debian/nokogiri.1.pod man/nokogiri.1
+	dh_installman
+
+override_dh_auto_clean:
+	rm -rf man/
+	dh_auto_clean
