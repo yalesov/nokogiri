@@ -26,6 +26,7 @@ Description: HTML, XML, SAX, and Reader parser for Ruby
 # Transitional packages
 Package: libnokogiri-ruby
 Section: oldlibs
+Priority: extra
 Architecture: all
 Depends: ${misc:Depends}, ruby-nokogiri
 Description: Transitional package for ruby-nokogiri
@@ -34,6 +35,7 @@ Description: Transitional package for ruby-nokogiri
 
 Package: libnokogiri-ruby1.8
 Section: oldlibs
+Priority: extra
 Architecture: all
 Depends: ${misc:Depends}, ruby-nokogiri
 Description: Transitional package for ruby-nokogiri
@@ -42,6 +44,7 @@ Description: Transitional package for ruby-nokogiri
 
 Package: libnokogiri-ruby1.9.1
 Section: oldlibs
+Priority: extra
 Architecture: all
 Depends: ${misc:Depends}, ruby-nokogiri
 Description: Transitional package for ruby-nokogiri
@@ -50,6 +53,7 @@ Description: Transitional package for ruby-nokogiri
 
 Package: libnokogiri-ruby1.9
 Section: oldlibs
+Priority: extra
 Architecture: all
 Depends: ${misc:Depends}, ruby-nokogiri
 Description: Transitional package for ruby-nokogiri
