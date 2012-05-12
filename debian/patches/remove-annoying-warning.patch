@@ -1,5 +1,7 @@
-http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=546843
-
+Description: Remove annoying warning about the version of libxml used
+Author: Ryan Niebur <ryanryan52@gmail.com>
+Bug-Debian: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=546843
+Forwarded: not-needed
 --- a/lib/nokogiri/version.rb
 +++ b/lib/nokogiri/version.rb
 @@ -28,11 +28,7 @@ module Nokogiri
