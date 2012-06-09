@@ -1,0 +1,22 @@
+From: Mike Dalessio <mike@csa.net>
+Subject: Fix format string security issue (Closes #676207)
+Origin: https://github.com/tenderlove/nokogiri/commit/786a42c87c3fbd7eb3c315f713414c5d5f58db74
+Bug: https://github.com/tenderlove/nokogiri/issues/680
+Bug-Debian: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=676207
+Last-Update: 2012-06-07
+
+---
+ ext/nokogiri/xml_xpath_context.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/ext/nokogiri/xml_xpath_context.c
++++ b/ext/nokogiri/xml_xpath_context.c
+@@ -190,7 +190,7 @@
+   vasprintf(&message, msg, args);
+   va_end(args);
+ 
+-  rb_raise(rb_eRuntimeError, message);
++  rb_raise(rb_eRuntimeError, "%s", message);
+ }
+ 
+ /*
