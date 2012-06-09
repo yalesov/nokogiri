@@ -1,3 +1,13 @@
+ruby-nokogiri (1.5.3-1) unstable; urgency=low
+
+  * New upstream version
+  * debian/patches:
+    + drop fix-sporadically-failing-tests.patch (applied upstream)
+    + add fix-format-security-issue.patch (cherrypicked from upstream)
+       Fixes FTBFS with -Werror=format-security flag (Closes: #676207)
+
+ -- Cédric Boutillier <cedric.boutillier@gmail.com>  Sat, 09 Jun 2012 16:08:57 +0200
+
 ruby-nokogiri (1.5.2-1) unstable; urgency=low
 
   * New upstream version
