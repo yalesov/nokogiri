@@ -100,12 +100,10 @@ module Nokogiri
 
       def test_css_search_uses_custom_selectors
         set = @xml.xpath('//employee')
-        assert_nothing_raised do
-          if Nokogiri.uses_libxml?
-            @xml.css('employee:thing()', @handler)
-          else
-            @xml.xpath("//employee[nokogiri:thing(.)]", @ns, @handler)
-          end
+        if Nokogiri.uses_libxml?
+          @xml.css('employee:thing()', @handler)
+        else
+          @xml.xpath("//employee[nokogiri:thing(.)]", @ns, @handler)
         end
         assert_equal(set.length, @handler.things.length)
         assert_equal(set.to_a, @handler.things.flatten)
@@ -253,6 +251,17 @@ module Nokogiri
           value = @xml.xpath('nokogiri:value()', @ns, @handler)
         end
         assert_equal 123.456, value
+      end
+
+      def test_custom_xpath_with_bullshit_arguments
+        xml = %q{<foo> </foo>}
+        doc = Nokogiri::XML.parse(xml)
+        foo = doc.xpath('//foo[bool_function(bar/baz)]', Class.new {
+            def bool_function(value)
+              true
+            end
+          }.new)
+        assert_equal foo, doc.xpath("//foo")
       end
     end
   end

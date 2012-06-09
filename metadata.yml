@@ -1,13 +1,13 @@
 --- !ruby/object:Gem::Specification 
 name: nokogiri
 version: !ruby/object:Gem::Version 
-  hash: 7
+  hash: 5
   prerelease: 
   segments: 
   - 1
   - 5
-  - 2
-  version: 1.5.2
+  - 3
+  version: 1.5.3
 platform: ruby
 authors: 
 - Aaron Patterson
@@ -17,7 +17,7 @@ autorequire:
 bindir: bin
 cert_chain: []
 
-date: 2012-03-09 00:00:00 Z
+date: 2012-06-01 00:00:00 Z
 dependencies: 
 - !ruby/object:Gem::Dependency 
   version_requirements: &id001 !ruby/object:Gem::Requirement 
@@ -32,8 +32,8 @@ dependencies:
         version: "1.1"
   prerelease: false
   requirement: *id001
-  type: :development
   name: hoe-bundler
+  type: :development
 - !ruby/object:Gem::Dependency 
   version_requirements: &id002 !ruby/object:Gem::Requirement 
     none: false
@@ -48,8 +48,8 @@ dependencies:
         version: 1.0.3
   prerelease: false
   requirement: *id002
-  type: :development
   name: hoe-debugging
+  type: :development
 - !ruby/object:Gem::Dependency 
   version_requirements: &id003 !ruby/object:Gem::Requirement 
     none: false
@@ -63,8 +63,8 @@ dependencies:
         version: "1.0"
   prerelease: false
   requirement: *id003
-  type: :development
   name: hoe-gemspec
+  type: :development
 - !ruby/object:Gem::Dependency 
   version_requirements: &id004 !ruby/object:Gem::Requirement 
     none: false
@@ -78,8 +78,8 @@ dependencies:
         version: "1.4"
   prerelease: false
   requirement: *id004
-  type: :development
   name: hoe-git
+  type: :development
 - !ruby/object:Gem::Dependency 
   version_requirements: &id005 !ruby/object:Gem::Requirement 
     none: false
@@ -94,8 +94,8 @@ dependencies:
         version: 0.2.2
   prerelease: false
   requirement: *id005
-  type: :development
   name: mini_portile
+  type: :development
 - !ruby/object:Gem::Dependency 
   version_requirements: &id006 !ruby/object:Gem::Requirement 
     none: false
@@ -110,8 +110,8 @@ dependencies:
         version: 2.2.2
   prerelease: false
   requirement: *id006
-  type: :development
   name: minitest
+  type: :development
 - !ruby/object:Gem::Dependency 
   version_requirements: &id007 !ruby/object:Gem::Requirement 
     none: false
@@ -126,8 +126,8 @@ dependencies:
         version: 1.4.6
   prerelease: false
   requirement: *id007
-  type: :development
   name: racc
+  type: :development
 - !ruby/object:Gem::Dependency 
   version_requirements: &id008 !ruby/object:Gem::Requirement 
     none: false
@@ -142,8 +142,8 @@ dependencies:
         version: 0.8.0
   prerelease: false
   requirement: *id008
-  type: :development
   name: rake-compiler
+  type: :development
 - !ruby/object:Gem::Dependency 
   version_requirements: &id009 !ruby/object:Gem::Requirement 
     none: false
@@ -158,8 +158,8 @@ dependencies:
         version: 1.0.5
   prerelease: false
   requirement: *id009
-  type: :development
   name: rexical
+  type: :development
 - !ruby/object:Gem::Dependency 
   version_requirements: &id010 !ruby/object:Gem::Requirement 
     none: false
@@ -173,8 +173,8 @@ dependencies:
         version: "3.10"
   prerelease: false
   requirement: *id010
-  type: :development
   name: rdoc
+  type: :development
 - !ruby/object:Gem::Dependency 
   version_requirements: &id011 !ruby/object:Gem::Requirement 
     none: false
@@ -188,8 +188,8 @@ dependencies:
         version: "2.13"
   prerelease: false
   requirement: *id011
-  type: :development
   name: hoe
+  type: :development
 description: "Nokogiri (\xE9\x8B\xB8) is an HTML, XML, SAX, and Reader parser.  Among Nokogiri's\n\
   many features is the ability to search documents via XPath or CSS3 selectors.\n\n\
   XML is like violence - if it doesn\xE2\x80\x99t solve your problems, you are not using\n\
@@ -248,11 +248,16 @@ files:
 - .gemtest
 - CHANGELOG.ja.rdoc
 - CHANGELOG.rdoc
+- C_CODING_STYLE.rdoc
 - Manifest.txt
 - README.ja.rdoc
 - README.rdoc
+- ROADMAP.md
 - Rakefile
+- STANDARD_RESPONSES.md
+- Y_U_NO_GEMSPEC.md
 - bin/nokogiri
+- build_all
 - ext/nokogiri/depend
 - ext/nokogiri/extconf.rb
 - ext/nokogiri/html_document.c
@@ -384,7 +389,6 @@ files:
 - lib/nokogiri/xslt.rb
 - lib/nokogiri/xslt/stylesheet.rb
 - lib/xsd/xmlparser/nokogiri.rb
-- nokogiri_help_responses.md
 - tasks/cross_compile.rb
 - tasks/nokogiri.org.rb
 - tasks/test.rb
@@ -414,7 +418,9 @@ files:
 - test/files/staff.xml
 - test/files/staff.xslt
 - test/files/tlm.html
+- test/files/to_be_xincluded.xml
 - test/files/valid_bar.xml
+- test/files/xinclude.xml
 - test/helper.rb
 - test/html/sax/test_parser.rb
 - test/html/sax/test_parser_context.rb
@@ -442,6 +448,7 @@ files:
 - test/xml/test_attr.rb
 - test/xml/test_attribute_decl.rb
 - test/xml/test_builder.rb
+- test/xml/test_c14n.rb
 - test/xml/test_cdata.rb
 - test/xml/test_comment.rb
 - test/xml/test_document.rb
@@ -457,9 +464,9 @@ files:
 - test/xml/test_node.rb
 - test/xml/test_node_attributes.rb
 - test/xml/test_node_encoding.rb
+- test/xml/test_node_inheritance.rb
 - test/xml/test_node_reparenting.rb
 - test/xml/test_node_set.rb
-- test/xml/test_node_inheritance.rb
 - test/xml/test_parse_options.rb
 - test/xml/test_processing_instruction.rb
 - test/xml/test_reader_encoding.rb
@@ -468,12 +475,11 @@ files:
 - test/xml/test_syntax_error.rb
 - test/xml/test_text.rb
 - test/xml/test_unparented_node.rb
+- test/xml/test_xinclude.rb
 - test/xml/test_xpath.rb
 - test/xslt/test_custom_functions.rb
 - test/xslt/test_exception_handling.rb
-- test/xml/test_c14n.rb
-- test/xml/test_xinclude.rb
-- C_CODING_STYLE.rdoc
+- test_all
 homepage: http://nokogiri.org
 licenses: []
 
@@ -506,7 +512,7 @@ required_rubygems_version: !ruby/object:Gem::Requirement
 requirements: []
 
 rubyforge_project: nokogiri
-rubygems_version: 1.8.15
+rubygems_version: 1.8.17
 signing_key: 
 specification_version: 3
 summary: "Nokogiri (\xE9\x8B\xB8) is an HTML, XML, SAX, and Reader parser"
