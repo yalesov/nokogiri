@@ -1,3 +1,2 @@
 remove-annoying-warning.patch
 no-require-rubygems.patch
-fix-format-security-issue.patch
