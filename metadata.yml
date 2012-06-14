@@ -1,23 +1,24 @@
 --- !ruby/object:Gem::Specification 
 name: nokogiri
 version: !ruby/object:Gem::Version 
-  hash: 5
+  hash: 11
   prerelease: 
   segments: 
   - 1
   - 5
-  - 3
-  version: 1.5.3
+  - 4
+  version: 1.5.4
 platform: ruby
 authors: 
 - Aaron Patterson
 - Mike Dalessio
 - Yoko Harada
+- Tim Elliott
 autorequire: 
 bindir: bin
 cert_chain: []
 
-date: 2012-06-01 00:00:00 Z
+date: 2012-06-11 00:00:00 Z
 dependencies: 
 - !ruby/object:Gem::Dependency 
   version_requirements: &id001 !ruby/object:Gem::Requirement 
@@ -132,6 +133,21 @@ dependencies:
   version_requirements: &id008 !ruby/object:Gem::Requirement 
     none: false
     requirements: 
+    - - ">="
+      - !ruby/object:Gem::Version 
+        hash: 25
+        segments: 
+        - 0
+        - 9
+        version: "0.9"
+  prerelease: false
+  requirement: *id008
+  name: rake
+  type: :development
+- !ruby/object:Gem::Dependency 
+  version_requirements: &id009 !ruby/object:Gem::Requirement 
+    none: false
+    requirements: 
     - - "="
       - !ruby/object:Gem::Version 
         hash: 63
@@ -141,11 +157,11 @@ dependencies:
         - 0
         version: 0.8.0
   prerelease: false
-  requirement: *id008
+  requirement: *id009
   name: rake-compiler
   type: :development
 - !ruby/object:Gem::Dependency 
-  version_requirements: &id009 !ruby/object:Gem::Requirement 
+  version_requirements: &id010 !ruby/object:Gem::Requirement 
     none: false
     requirements: 
     - - ">="
@@ -157,11 +173,11 @@ dependencies:
         - 5
         version: 1.0.5
   prerelease: false
-  requirement: *id009
+  requirement: *id010
   name: rexical
   type: :development
 - !ruby/object:Gem::Dependency 
-  version_requirements: &id010 !ruby/object:Gem::Requirement 
+  version_requirements: &id011 !ruby/object:Gem::Requirement 
     none: false
     requirements: 
     - - ~>
@@ -172,22 +188,22 @@ dependencies:
         - 10
         version: "3.10"
   prerelease: false
-  requirement: *id010
+  requirement: *id011
   name: rdoc
   type: :development
 - !ruby/object:Gem::Dependency 
-  version_requirements: &id011 !ruby/object:Gem::Requirement 
+  version_requirements: &id012 !ruby/object:Gem::Requirement 
     none: false
     requirements: 
     - - ~>
       - !ruby/object:Gem::Version 
-        hash: 25
+        hash: 35
         segments: 
         - 2
-        - 13
-        version: "2.13"
+        - 16
+        version: "2.16"
   prerelease: false
-  requirement: *id011
+  requirement: *id012
   name: hoe
   type: :development
 description: "Nokogiri (\xE9\x8B\xB8) is an HTML, XML, SAX, and Reader parser.  Among Nokogiri's\n\
@@ -198,17 +214,18 @@ email:
 - aaronp@rubyforge.org
 - mike.dalessio@gmail.com
 - yokolet@gmail.com
+- tle@holymonkey.com
 executables: 
 - nokogiri
 extensions: 
 - ext/nokogiri/extconf.rb
 extra_rdoc_files: 
-- Manifest.txt
 - CHANGELOG.ja.rdoc
+- CHANGELOG.rdoc
+- C_CODING_STYLE.rdoc
+- Manifest.txt
 - README.ja.rdoc
 - README.rdoc
-- C_CODING_STYLE.rdoc
-- CHANGELOG.rdoc
 - ext/nokogiri/xml_encoding_handler.c
 - ext/nokogiri/html_sax_push_parser.c
 - ext/nokogiri/xml_processing_instruction.c
