@@ -1,3 +1,10 @@
+ruby-nokogiri (1.5.4-1) unstable; urgency=low
+
+  * New upstream version
+  * Drop fix-format-security-issue.patch: included upstream
+
+ -- Cédric Boutillier <cedric.boutillier@gmail.com>  Fri, 15 Jun 2012 23:53:43 +0200
+
 ruby-nokogiri (1.5.3-1) unstable; urgency=low
 
   * New upstream version
