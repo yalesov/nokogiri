@@ -1,2 +1,3 @@
 remove-annoying-warning.patch
 no-require-rubygems.patch
+include_missing_test_document_url_directory.patch
