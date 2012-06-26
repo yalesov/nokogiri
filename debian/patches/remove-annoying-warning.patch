@@ -4,7 +4,7 @@ Bug-Debian: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=546843
 Forwarded: not-needed
 --- a/lib/nokogiri/version.rb
 +++ b/lib/nokogiri/version.rb
-@@ -28,11 +28,7 @@ module Nokogiri
+@@ -28,11 +28,7 @@
      def warnings
        return [] unless libxml2?
  
