@@ -34,8 +34,8 @@ HOE = Hoe.spec 'nokogiri' do
     'nokogiri.gemspec',
     'lib/nokogiri/nokogiri.{bundle,jar,rb,so}',
     'lib/nokogiri/1.{8,9}',
-    GENERATED_PARSER,
-    GENERATED_TOKENIZER
+    # GENERATED_PARSER,
+    # GENERATED_TOKENIZER
   ]
 
   self.extra_dev_deps += [
@@ -45,11 +45,15 @@ HOE = Hoe.spec 'nokogiri' do
     ["hoe-git",         ">= 1.4"],
     ["mini_portile",    ">= 0.2.2"],
     ["minitest",        "~> 2.2.2"],
-    ["racc",            ">= 1.4.6"],
     ["rake",            ">= 0.9"],
-    ["rake-compiler",   "=  0.8.0"],
-    ["rexical",         ">= 1.0.5"],
+    ["rake-compiler",   "=  0.8.0"]
   ]
+  if ! java?
+    self.extra_dev_deps += [
+      ["racc",            ">= 1.4.6"],
+      ["rexical",         ">= 1.0.5"]
+    ]
+  end
 
   if java?
     self.spec_extras = { :platform => 'java' }
@@ -141,7 +145,12 @@ end
 
 require 'tasks/test'
 
+task :java_debug do
+  ENV['JAVA_OPTS'] = '-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y' if java? && ENV['JAVA_DEBUG']
+end
+
 Rake::Task[:test].prerequisites << :compile
+Rake::Task[:test].prerequisites << :java_debug
 Rake::Task[:test].prerequisites << :check_extra_deps unless java?
 if Hoe.plugins.include?(:debugging)
   ['valgrind', 'valgrind:mem', 'valgrind:mem0'].each do |task_name|

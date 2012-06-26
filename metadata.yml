@@ -1,13 +1,13 @@
 --- !ruby/object:Gem::Specification 
 name: nokogiri
 version: !ruby/object:Gem::Version 
-  hash: 11
+  hash: 9
   prerelease: 
   segments: 
   - 1
   - 5
-  - 4
-  version: 1.5.4
+  - 5
+  version: 1.5.5
 platform: ruby
 authors: 
 - Aaron Patterson
@@ -18,7 +18,7 @@ autorequire:
 bindir: bin
 cert_chain: []
 
-date: 2012-06-11 00:00:00 Z
+date: 2012-06-23 00:00:00 Z
 dependencies: 
 - !ruby/object:Gem::Dependency 
   version_requirements: &id001 !ruby/object:Gem::Requirement 
@@ -119,33 +119,17 @@ dependencies:
     requirements: 
     - - ">="
       - !ruby/object:Gem::Version 
-        hash: 11
-        segments: 
-        - 1
-        - 4
-        - 6
-        version: 1.4.6
-  prerelease: false
-  requirement: *id007
-  name: racc
-  type: :development
-- !ruby/object:Gem::Dependency 
-  version_requirements: &id008 !ruby/object:Gem::Requirement 
-    none: false
-    requirements: 
-    - - ">="
-      - !ruby/object:Gem::Version 
         hash: 25
         segments: 
         - 0
         - 9
         version: "0.9"
   prerelease: false
-  requirement: *id008
+  requirement: *id007
   name: rake
   type: :development
 - !ruby/object:Gem::Dependency 
-  version_requirements: &id009 !ruby/object:Gem::Requirement 
+  version_requirements: &id008 !ruby/object:Gem::Requirement 
     none: false
     requirements: 
     - - "="
@@ -157,8 +141,24 @@ dependencies:
         - 0
         version: 0.8.0
   prerelease: false
-  requirement: *id009
+  requirement: *id008
   name: rake-compiler
+  type: :development
+- !ruby/object:Gem::Dependency 
+  version_requirements: &id009 !ruby/object:Gem::Requirement 
+    none: false
+    requirements: 
+    - - ">="
+      - !ruby/object:Gem::Version 
+        hash: 11
+        segments: 
+        - 1
+        - 4
+        - 6
+        version: 1.4.6
+  prerelease: false
+  requirement: *id009
+  name: racc
   type: :development
 - !ruby/object:Gem::Dependency 
   version_requirements: &id010 !ruby/object:Gem::Requirement 
