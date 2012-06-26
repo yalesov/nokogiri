@@ -1,3 +1,14 @@
+ruby-nokogiri (1.5.5-1) unstable; urgency=low
+
+  * New upstream version
+  * Build-depend on gem2deb >= 0.3.0~
+  * add include_missing_test_document_url_directory.patch
+    + include test/files/test_document_url/ missing from the gem released by
+      upstream
+  * cosmetic refreshment of remove-annoying-warning.patch
+
+ -- Cédric Boutillier <cedric.boutillier@gmail.com>  Tue, 26 Jun 2012 14:07:29 +0200
+
 ruby-nokogiri (1.5.4-1) unstable; urgency=low
 
   * New upstream version
