@@ -1192,7 +1192,10 @@ public class XmlNode extends RubyObject {
               } else {
                 uri = findNamespaceHref(context, prefix);
               }
-              element.setAttributeNS(uri, key, val);
+              if (uri != null)
+                element.setAttributeNS(uri, key, val);
+              else
+                element.setAttribute(key, val);
             } else {
               element.setAttribute(key, val);
             }
@@ -1206,14 +1209,16 @@ public class XmlNode extends RubyObject {
       XmlNode currentNode = this;
       while(currentNode != document(context)) {
         RubyArray namespaces = (RubyArray) currentNode.namespace_scopes(context);
-        Iterator iterator = namespaces.iterator();
+        Iterator<?> iterator = namespaces.iterator();
         while(iterator.hasNext()) {
           XmlNamespace namespace = (XmlNamespace) iterator.next();
           if (namespace.getPrefix().equals(prefix)) {
             return namespace.getHref();
           }
         }
-        currentNode = (XmlNode) currentNode.parent(context);
+        IRubyObject parent = currentNode.parent(context);
+        if (parent.isNil()) return null;
+        currentNode = (XmlNode) parent;
       }
       return null;
     }

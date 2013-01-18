@@ -111,6 +111,23 @@ module Nokogiri
         assert_equal 'bar', doc.at('foo|baz', 'foo' => 'bar').namespace.href
       end
 
+      # issue 814
+      # Java throws an exception when a namespace is specified and
+      # is used in a nested tag
+      def test_use_namespace_defined_in_parent
+        b = Nokogiri::XML::Builder.new { |xml|
+          xml.root('xmlns:a' => 'a') {
+            xml.element('a:b' => 'a:c')
+          }
+        }
+        doc = b.doc
+        # C Nokogiri will barf on the following line, the
+        # commented test will succeed in MRI but not in JRuby.
+        # The confusing part is that the attribute has no namespace ?!
+        # refute_nil doc.xpath('//element').first.attributes['a:b']
+        refute_nil doc.xpath('//element').first.attributes['b']
+      end
+
       def test_dtd_in_builder_output
         builder = Nokogiri::XML::Builder.new do |xml|
           xml.doc.create_internal_subset(
