@@ -24,6 +24,14 @@ module Nokogiri
         end
       end
 
+      # issue 863
+      def test_no_extra_elements
+        # we should not add an extra <table> element to wrap the fragment
+        expected_html = "<tr><td>yeah yeah</td></tr>"
+        actual_html = Nokogiri::HTML.fragment(expected_html).to_html
+        assert_equal(expected_html, actual_html)
+      end
+
       def test_colons_are_not_removed
         doc = Nokogiri::HTML::DocumentFragment.parse("<span>3:30pm</span>")
         assert_match(/3:30/, doc.to_s)
