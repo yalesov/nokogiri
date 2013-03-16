@@ -104,6 +104,13 @@ module Nokogiri
         assert_nil doc.root
       end
 
+      # issue #847
+      def test_empty_document_has_dtd
+        doc = Nokogiri::HTML::Document.new
+        assert_equal doc.children.count, 1
+        assert_equal doc.children.first.type, Nokogiri::XML::Node::DTD_NODE
+      end
+
       unless Nokogiri.uses_libxml? && %w[2 6] === LIBXML_VERSION.split('.')[0..1]
         # FIXME: this is a hack around broken libxml versions
         def test_to_xhtml_with_indent
