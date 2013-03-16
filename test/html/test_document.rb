@@ -104,6 +104,16 @@ module Nokogiri
         assert_nil doc.root
       end
 
+      # issue #521
+      def test_jruby_without_extra_whitespace
+        doc = Nokogiri::HTML(%{
+      <html>
+        <body>Hello</body>
+      </html>
+})
+        assert_equal doc.inner_text, "Hello"
+      end
+
       # issue #847
       def test_empty_document_has_dtd
         doc = Nokogiri::HTML::Document.new
