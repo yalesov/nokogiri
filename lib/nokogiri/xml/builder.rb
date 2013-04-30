@@ -318,7 +318,9 @@ module Nokogiri
       # Build a tag that is associated with namespace +ns+.  Raises an
       # ArgumentError if +ns+ has not been defined higher in the tree.
       def [] ns
-        @ns = @parent.namespace_definitions.find { |x| x.prefix == ns.to_s }
+        if @parent != @doc
+          @ns = @parent.namespace_definitions.find { |x| x.prefix == ns.to_s }
+        end
         return self if @ns
 
         @parent.ancestors.each do |a|
@@ -327,7 +329,8 @@ module Nokogiri
           return self if @ns
         end
 
-        raise ArgumentError, "Namespace #{ns} has not been defined"
+        @ns = { :pending => ns.to_s }
+        return self
       end
 
       ###
@@ -355,11 +358,20 @@ module Nokogiri
         else
           node = @doc.create_element(method.to_s.sub(/[_!]$/, ''),*args) { |n|
             # Set up the namespace
-            if @ns
+            if @ns.is_a? Nokogiri::XML::Namespace
               n.namespace = @ns
               @ns = nil
             end
           }
+
+          if @ns.is_a? Hash
+            node.namespace = node.namespace_definitions.find { |x| x.prefix == @ns[:pending] }
+            if node.namespace.nil?
+              raise ArgumentError, "Namespace #{@ns[:pending]} has not been defined"
+            end
+            @ns = nil
+          end
+
           insert(node, &block)
         end
       end

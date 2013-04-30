@@ -8,6 +8,7 @@ RbConfig::MAKEFILE_CONFIG['CC'] = ENV['CC'] if ENV['CC']
 
 ROOT = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 LIBDIR = RbConfig::CONFIG['libdir']
+@libdir_basename = "lib" # shrug, ruby 2.0 won't work for me.
 INCLUDEDIR = RbConfig::CONFIG['includedir']
 
 if defined?(RUBY_ENGINE) && RUBY_ENGINE == 'macruby'
@@ -27,6 +28,7 @@ end
 
 if RbConfig::MAKEFILE_CONFIG['CC'] =~ /mingw/
   $CFLAGS << " -DIN_LIBXML"
+  $LIBS << " -lz" # TODO why is this necessary?
 end
 
 if RbConfig::MAKEFILE_CONFIG['CC'] =~ /gcc/

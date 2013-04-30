@@ -7,7 +7,7 @@ Hoe.plugin :debugging
 Hoe.plugin :git
 Hoe.plugin :gemspec
 Hoe.plugin :bundler
-Hoe.add_include_dirs '.' # for ruby 1.9.2
+Hoe.add_include_dirs '.'
 
 GENERATED_PARSER    = "lib/nokogiri/css/parser.rb"
 GENERATED_TOKENIZER = "lib/nokogiri/css/tokenizer.rb"
@@ -16,6 +16,8 @@ CROSS_DIR           =  File.join(File.dirname(__FILE__), 'ports')
 def java?
   !! (RUBY_PLATFORM =~ /java/)
 end
+
+ENV['LANG'] = "en_US.UTF-8" # UBUNTU 10.04, Y U NO DEFAULT TO UTF-8?
 
 require 'tasks/nokogiri.org'
 
@@ -33,7 +35,7 @@ HOE = Hoe.spec 'nokogiri' do
   self.clean_globs += [
     'nokogiri.gemspec',
     'lib/nokogiri/nokogiri.{bundle,jar,rb,so}',
-    'lib/nokogiri/1.{8,9}',
+    'lib/nokogiri/{1.8,1.9,2.0}',
     # GENERATED_PARSER,
     # GENERATED_TOKENIZER
   ]
@@ -46,14 +48,10 @@ HOE = Hoe.spec 'nokogiri' do
     ["mini_portile",    ">= 0.2.2"],
     ["minitest",        "~> 2.2.2"],
     ["rake",            ">= 0.9"],
-    ["rake-compiler",   "=  0.8.0"]
+    ["rake-compiler",   "~> 0.8.0"],
+    ["racc",            ">= 1.4.6"],
+    ["rexical",         ">= 1.0.5"]
   ]
-  if ! java?
-    self.extra_dev_deps += [
-      ["racc",            ">= 1.4.6"],
-      ["rexical",         ">= 1.0.5"]
-    ]
-  end
 
   if java?
     self.spec_extras = { :platform => 'java' }
@@ -69,6 +67,19 @@ end
 
 # ----------------------------------------
 
+def add_file_to_gem relative_path
+  target_path = File.join gem_build_path, relative_path
+  target_dir = File.dirname(target_path)
+  mkdir_p target_dir unless File.directory?(target_dir)
+  rm_f target_path
+  ln relative_path, target_path
+  HOE.spec.files += [relative_path]
+end
+
+def gem_build_path
+  File.join 'pkg', HOE.spec.full_name
+end
+
 if java?
   # TODO: clean this section up.
   require "rake/javaextensiontask"
@@ -80,17 +91,15 @@ if java?
     ext.classpath = jars.map { |x| File.expand_path x }.join ':'
   end
 
-  gem_build_path = File.join 'pkg', HOE.spec.full_name
-
   task gem_build_path => [:compile] do
-    cp 'lib/nokogiri/nokogiri.jar', File.join(gem_build_path, 'lib', 'nokogiri')
-    HOE.spec.files += ['lib/nokogiri/nokogiri.jar']
+    add_file_to_gem 'lib/nokogiri/nokogiri.jar'
   end
 else
   mingw_available = true
   begin
     require 'tasks/cross_compile'
   rescue
+    puts "WARNING: cross compilation not available: #{$!}"
     mingw_available = false
   end
   require "rake/extensiontask"
@@ -103,10 +112,10 @@ else
     if mingw_available
       ext.cross_compile  = true
       ext.cross_platform = ["x86-mswin32-60", "x86-mingw32"]
-      ext.cross_config_options << "--with-xml2-include=#{File.join($recipes[:libxml2].path, 'include', 'libxml2')}"
-      ext.cross_config_options << "--with-xml2-lib=#{File.join($recipes[:libxml2].path, 'lib')}"
-      ext.cross_config_options << "--with-iconv-dir=#{$recipes[:libiconv].path}"
-      ext.cross_config_options << "--with-xslt-dir=#{$recipes[:libxslt].path}"
+      ext.cross_config_options << "--with-xml2-include=#{File.join($recipes["libxml2"].path, 'include', 'libxml2')}"
+      ext.cross_config_options << "--with-xml2-lib=#{File.join($recipes["libxml2"].path, 'lib')}"
+      ext.cross_config_options << "--with-iconv-dir=#{$recipes["libiconv"].path}"
+      ext.cross_config_options << "--with-xslt-dir=#{$recipes["libxslt"].path}"
       ext.cross_config_options << "--with-zlib-dir=#{CROSS_DIR}"
     end
   end
@@ -117,6 +126,20 @@ end
 desc "Generate css/parser.rb and css/tokenizer.rex"
 task 'generate' => [GENERATED_PARSER, GENERATED_TOKENIZER]
 task 'gem:spec' => 'generate' if Rake::Task.task_defined?("gem:spec")
+
+# This is a big hack to make sure that the racc and rexical
+# dependencies in the Gemfile are constrainted to ruby platforms
+# (i.e. MRI and Rubinius). There's no way to do that through hoe,
+# and any solution will require changing hoe and hoe-bundler.
+old_gemfile_task = Rake::Task['bundler:gemfile'] rescue nil
+task 'bundler:gemfile' do
+  old_gemfile_task.invoke if old_gemfile_task
+
+  lines = File.open('Gemfile', 'r') { |f| f.readlines }.map do |line|
+    line =~ /racc|rexical/ ? "#{line.strip}, :platform => :ruby" : line
+  end
+  File.open('Gemfile', 'w') { |f| lines.each { |line| f.puts line } }
+end
 
 file GENERATED_PARSER => "lib/nokogiri/css/parser.y" do |t|
   racc = RbConfig::CONFIG['target_os'] =~ /mswin32/ ? '' : `which racc`.strip
@@ -149,9 +172,18 @@ task :java_debug do
   ENV['JAVA_OPTS'] = '-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y' if java? && ENV['JAVA_DEBUG']
 end
 
+if java?
+  task :test_18 => :test
+  task :test_19 do
+    ENV['JRUBY_OPTS'] = "--1.9"
+    Rake::Task["test"].invoke
+  end
+end
+
 Rake::Task[:test].prerequisites << :compile
 Rake::Task[:test].prerequisites << :java_debug
 Rake::Task[:test].prerequisites << :check_extra_deps unless java?
+
 if Hoe.plugins.include?(:debugging)
   ['valgrind', 'valgrind:mem', 'valgrind:mem0'].each do |task_name|
     Rake::Task["test:#{task_name}"].prerequisites << :compile
@@ -162,7 +194,7 @@ end
 
 desc "build a windows gem without all the ceremony."
 task "gem:windows" => "gem" do
-  cross_rubies = ["1.8.7-p330", "1.9.2-p136"]
+  cross_rubies = ["1.8.7-p358", "1.9.3-p194", "2.0.0-p0"]
   ruby_cc_version = cross_rubies.collect { |_| _.split("-").first }.join(":") # e.g., "1.8.7:1.9.2"
   rake_compiler_config_path = "#{ENV['HOME']}/.rake-compiler/config.yml"
 
@@ -183,10 +215,13 @@ task "gem:windows" => "gem" do
   end
 
   # verify that --export-all is in the 1.9 rbconfig. see #279,#374,#375.
-  rbconfig_19 = rake_compiler_config["rbconfig-1.9.2"]
+  rbconfig_19 = rake_compiler_config["rbconfig-1.9.3"]
   raise "rbconfig #{rbconfig_19} needs --export-all in its DLDFLAGS value" if File.read(rbconfig_19).split("\n").grep(/CONFIG\["DLDFLAGS"\].*--export-all/).empty?
 
-  pkg_config_path = [:libxslt, :libxml2].collect { |pkg| File.join($recipes[pkg].path, "lib/pkgconfig") }.join(":")
+  rbconfig_20 = rake_compiler_config["rbconfig-2.0.0"]
+  raise "rbconfig #{rbconfig_20} needs --export-all in its DLDFLAGS value" if File.read(rbconfig_20).split("\n").grep(/CONFIG\["DLDFLAGS"\].*--export-all/).empty?
+
+  pkg_config_path = %w[libxslt libxml2].collect { |pkg| File.join($recipes[pkg].path, "lib/pkgconfig") }.join(":")
   sh("env PKG_CONFIG_PATH=#{pkg_config_path} RUBY_CC_VERSION=#{ruby_cc_version} rake cross native gem") || raise("build failed!")
 end
 

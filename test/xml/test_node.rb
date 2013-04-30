@@ -624,6 +624,13 @@ module Nokogiri
         assert_equal "Yes", address[:domestic]
       end
 
+      def test_empty_attribute_reading
+        node = Nokogiri::XML '<foo empty="" whitespace="  "/>'
+
+        assert_equal '', node.root['empty']
+        assert_equal '  ', node.root['whitespace']
+      end
+
       def test_delete
         address = @xml.xpath('/staff/employee/address').first
         assert_equal 'Yes', address['domestic']
@@ -635,6 +642,25 @@ module Nokogiri
         node = @xml.at('//name')
         node.content = :foo
         assert_equal 'foo', node.content
+      end
+
+      def test_set_native_content_is_unescaped
+        comment = Nokogiri.XML('<r><!-- foo --></r>').at('//comment()')
+
+        comment.native_content = " < " # content= will escape this string
+        assert_equal "<!-- < -->", comment.to_xml
+      end
+
+      def test_find_by_css_class_with_nonstandard_whitespace
+        doc = Nokogiri::HTML '
+<html>
+  <body>
+    <div class="a 
+b"></div>
+  </body>
+</html>
+'
+        assert_not_nil doc.at_css(".b")
       end
 
       def test_find_by_css_with_tilde_eql
@@ -717,6 +743,14 @@ module Nokogiri
         assert_equal('bar', node['foo'])
       end
 
+      def test_set_property_non_string
+        assert node = @xml.search('//address').first
+        node['foo'] = 1
+        assert_equal('1', node['foo'])
+        node['foo'] = false
+        assert_equal('false', node['foo'])
+      end
+
       def test_attributes
         assert node = @xml.search('//address').first
         assert_nil(node['asdfasdfasdf'])
@@ -783,6 +817,33 @@ module Nokogiri
         node.content = "1234 <-> 1234"
         assert_equal "1234 <-> 1234", node.content
         assert_equal "<form>1234 &lt;-&gt; 1234</form>", node.to_xml
+
+        node.content = '1234'
+        node.add_child '<foo>5678</foo>'
+        assert_equal '12345678', node.content
+      end
+
+      # issue #839
+      def test_encoding_of_copied_nodes
+        d1 = Nokogiri::XML('<r><a>&amp;</a></r>')
+        d2 = Nokogiri::XML('<r></r>')
+        ne = d1.root.xpath('//a').first.dup(1)
+        ne.content += "& < & > \" &"
+        d2.root << ne
+        assert_match d2.to_s, /<a>&amp;&amp; &lt; &amp; &gt; " &amp;<\/a>/
+      end
+
+      def test_content_after_appending_text
+        doc = Nokogiri::XML '<foo />'
+        node = doc.children.first
+        node.content = 'bar'
+        node << 'baz'
+        assert_equal 'barbaz', node.content
+      end
+
+      def test_content_depth_first
+        node = Nokogiri::XML '<foo>first<baz>second</baz>third</foo>'
+        assert_equal 'firstsecondthird', node.content
       end
 
       def test_set_content_should_unlink_existing_content
@@ -828,6 +889,22 @@ module Nokogiri
         assert_equal 1, tires.length
       end
 
+      def test_namespace_search_with_xpath_and_hash_with_symbol_keys
+        xml = Nokogiri::XML.parse(<<-eoxml)
+        <root>
+          <car xmlns:part="http://general-motors.com/">
+            <part:tire>Michelin Model XGV</part:tire>
+          </car>
+          <bicycle xmlns:part="http://schwinn.com/">
+            <part:tire>I'm a bicycle tire!</part:tire>
+          </bicycle>
+        </root>
+        eoxml
+
+        tires = xml.xpath('//bike:tire', :bike => 'http://schwinn.com/')
+        assert_equal 1, tires.length
+      end
+
       def test_namespace_search_with_css
         xml = Nokogiri::XML.parse(<<-eoxml)
         <root>
@@ -840,7 +917,7 @@ module Nokogiri
         </root>
         eoxml
 
-        tires = xml.css('bike|tire', 'bike' => 'http://schwinn.com/')
+        tires = xml.css('bike|tire', 'bike' => 'http://schwinn.com/' )
         assert_equal 1, tires.length
       end
 
@@ -1023,6 +1100,37 @@ EOXML
         assert_equal ns.class, Nokogiri::XML::Namespace
         assert_nil ns.prefix
         assert_equal ns.href, "http://bar.com"
+      end
+
+      # issue 695
+      def test_namespace_in_rendered_xml
+        document = Nokogiri::XML::Document.new
+        subject = Nokogiri::XML::Node.new 'foo', document
+        ns = subject.add_namespace nil, 'bar'
+        subject.namespace = ns
+        assert_match(/xmlns="bar"/, subject.to_xml)
+      end
+
+      # issue 771
+      def test_format_noblank
+        content = <<eoxml
+<foo>
+  <bar>hello</bar>
+</foo>
+eoxml
+        subject = Nokogiri::XML(content) do |conf|
+          conf.default_xml.noblanks
+        end
+
+        assert_match %r{<bar>hello</bar>}, subject.to_xml(:indent => 2)
+      end
+
+      def test_text_node_colon
+        document = Nokogiri::XML::Document.new
+        root = Nokogiri::XML::Node.new 'foo', document
+        document.root = root
+        root << "<a>hello:with_colon</a>"
+        assert_match(/hello:with_colon/, document.to_xml)
       end
     end
   end

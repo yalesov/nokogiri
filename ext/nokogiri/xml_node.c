@@ -23,10 +23,34 @@ typedef xmlNodePtr (*pivot_reparentee_func)(xmlNodePtr, xmlNodePtr);
 /* :nodoc: */
 static void relink_namespace(xmlNodePtr reparented)
 {
+  xmlChar *name, *prefix;
   xmlNodePtr child;
+  xmlNsPtr ns;
+
+  if (reparented->type != XML_ATTRIBUTE_NODE &&
+      reparented->type != XML_ELEMENT_NODE) return;
+
+  if (reparented->ns == NULL || reparented->ns->prefix == NULL) {
+    name = xmlSplitQName2(reparented->name, &prefix);
+
+    if(reparented->type == XML_ATTRIBUTE_NODE) {
+      if (prefix == NULL || strcmp((char*)prefix, XMLNS_PREFIX) == 0) return;
+    }
+
+    ns = xmlSearchNs(reparented->doc, reparented, prefix);
+
+    if (ns == NULL && reparented->parent) {
+      ns = xmlSearchNs(reparented->doc, reparented->parent, prefix);
+    }
+
+    if (ns != NULL) {
+      xmlNodeSetName(reparented, name);
+      xmlSetNs(reparented, ns);
+    }
+  }
 
   /* Avoid segv when relinking against unlinked nodes. */
-  if(!reparented->parent) return;
+  if (reparented->type != XML_ELEMENT_NODE || !reparented->parent) return;
 
   /* Make sure that our reparented node has the correct namespaces */
   if(!reparented->ns && reparented->doc != (xmlDocPtr)reparented->parent)
@@ -70,6 +94,14 @@ static void relink_namespace(xmlNodePtr reparented)
     relink_namespace(child);
     child = child->next;
   }
+
+  if (reparented->type == XML_ELEMENT_NODE) {
+    child = (xmlNodePtr)((xmlElementPtr)reparented)->attributes;
+    while(NULL != child) {
+      relink_namespace(child);
+      child = child->next;
+    }
+  }
 }
 
 /* :nodoc: */
@@ -84,7 +116,7 @@ static xmlNodePtr xmlReplaceNodeWrapper(xmlNodePtr pivot, xmlNodePtr new_node)
   }
 
   /* work around libxml2 issue: https://bugzilla.gnome.org/show_bug.cgi?id=615612 */
-  if (retval->type == XML_TEXT_NODE) {
+  if (retval && retval->type == XML_TEXT_NODE) {
     if (retval->prev && retval->prev->type == XML_TEXT_NODE) {
       retval = xmlTextMerge(retval->prev, retval);
     }
@@ -699,23 +731,42 @@ static VALUE set(VALUE self, VALUE property, VALUE value)
  *
  * Get the value for +attribute+
  */
-static VALUE get(VALUE self, VALUE attribute)
+static VALUE get(VALUE self, VALUE rattribute)
 {
   xmlNodePtr node;
-  xmlChar* propstr ;
-  VALUE rval ;
+  xmlChar* value = 0;
+  VALUE rvalue ;
+  char* attribute = 0;
+  char *colon = 0, *attr_name = 0, *prefix = 0;
+  xmlNsPtr ns;
+
+  if (NIL_P(rattribute)) return Qnil;
+
   Data_Get_Struct(self, xmlNode, node);
+  attribute = strdup(StringValuePtr(rattribute));
 
-  if(NIL_P(attribute)) return Qnil;
+  colon = strchr(attribute, ':');
+  if (colon) {
+    (*colon) = 0 ; /* create two null-terminated strings of the prefix and attribute name */
+    prefix = attribute ;
+    attr_name = colon + 1 ;
+    ns = xmlSearchNs(node->doc, node, (const xmlChar *)(prefix));
+    if (ns) {
+      value = xmlGetNsProp(node, (xmlChar*)(attr_name), ns->href);
+    } else {
+      value = xmlGetProp(node, (xmlChar*)StringValuePtr(rattribute));
+    }
+  } else {
+    value = xmlGetNoNsProp(node, (xmlChar*)attribute);
+  }
 
-  propstr = xmlGetProp(node, (xmlChar *)StringValuePtr(attribute));
+  free(attribute);
+  if (!value) return Qnil;
 
-  if(!propstr) return Qnil;
+  rvalue = NOKOGIRI_STR_NEW2(value);
+  xmlFree(value);
 
-  rval = NOKOGIRI_STR_NEW2(propstr);
-
-  xmlFree(propstr);
-  return rval ;
+  return rvalue ;
 }
 
 /*
@@ -892,7 +943,7 @@ static VALUE node_type(VALUE self)
  *
  * Set the content for this Node
  */
-static VALUE set_content(VALUE self, VALUE content)
+static VALUE native_content(VALUE self, VALUE content)
 {
   xmlNodePtr node, child, next ;
   Data_Get_Struct(self, xmlNode, node);
@@ -1219,7 +1270,7 @@ static VALUE process_xincludes(VALUE self, VALUE options)
 /* TODO: DOCUMENT ME */
 static VALUE in_context(VALUE self, VALUE _str, VALUE _options)
 {
-    xmlNodePtr node, list = 0, child_iter, node_children, doc_children;
+    xmlNodePtr node, list = 0, tmp, child_iter, node_children, doc_children;
     xmlNodeSetPtr set;
     xmlParserErrors error;
     VALUE doc, err;
@@ -1288,7 +1339,7 @@ static VALUE in_context(VALUE self, VALUE _str, VALUE _options)
       child_iter = node;
       while (child_iter->parent)
         child_iter = child_iter->parent;
-	
+
       if (child_iter->type == XML_DOCUMENT_FRAG_NODE)
         node->doc->children = NULL;
     }
@@ -1306,8 +1357,11 @@ static VALUE in_context(VALUE self, VALUE _str, VALUE _options)
     set = xmlXPathNodeSetCreate(NULL);
 
     while (list) {
+      tmp = list->next;
+      list->next = NULL;
       xmlXPathNodeSetAddUnique(set, list);
-      list = list->next;
+      nokogiri_root_node(list);
+      list = tmp;
     }
 
     return Nokogiri_wrap_xml_node_set(set, doc);
@@ -1458,6 +1512,7 @@ void init_xml_node()
   rb_define_method(klass, "create_external_subset", create_external_subset, 3);
   rb_define_method(klass, "pointer_id", pointer_id, 0);
   rb_define_method(klass, "line", line, 0);
+  rb_define_method(klass, "native_content=", native_content, 1);
 
   rb_define_private_method(klass, "process_xincludes", process_xincludes, 1);
   rb_define_private_method(klass, "in_context", in_context, 2);
@@ -1467,7 +1522,6 @@ void init_xml_node()
   rb_define_private_method(klass, "replace_node", replace, 1);
   rb_define_private_method(klass, "dump_html", dump_html, 0);
   rb_define_private_method(klass, "native_write_to", native_write_to, 4);
-  rb_define_private_method(klass, "native_content=", set_content, 1);
   rb_define_private_method(klass, "get", get, 1);
   rb_define_private_method(klass, "set", set, 2);
   rb_define_private_method(klass, "set_namespace", set_namespace, 1);

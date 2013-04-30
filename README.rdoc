@@ -1,4 +1,4 @@
-= Nokogiri {<img src="https://secure.travis-ci.org/sparklemotion/nokogiri.png?rvm=1.9.3" />}[http://travis-ci.org/sparklemotion/nokogiri]
+= Nokogiri {<img src="https://secure.travis-ci.org/sparklemotion/nokogiri.png?rvm=1.9.3" />}[http://travis-ci.org/sparklemotion/nokogiri] {<img src="https://codeclimate.com/badge.png" />}[https://codeclimate.com/github/sparklemotion/nokogiri]
 
 * http://nokogiri.org
 * http://github.com/sparklemotion/nokogiri/wikis
@@ -122,13 +122,10 @@ Developing Nokogiri requires racc and rexical to generate the parser and
 tokenizer.  To start development, make sure you have `libxml2` and `libxslt`
 installed.
 
-Then install hoe and rake-compiler:
+Then install core gems and bootstrap:
 
-    $ gem install hoe rake-compiler racc rexical minitest
-
-Then run rake:
-
-    $ rake
+    $ gem install hoe rake-compiler mini_portile
+    $ rake newb
 
 === Developing on JRuby
 
@@ -151,7 +148,7 @@ Then run rake:
 
 Copyright (c) 2008 - 2012:
 
-* {Aaron Patterson}[http://sparklemotionmaking.com]
+* {Aaron Patterson}[http://tenderlovemaking.com]
 * {Mike Dalessio}[http://mike.daless.io]
 * {Charles Nutter}[http://blog.headius.com]
 * {Sergio Arbeo}[http://www.serabe.com]

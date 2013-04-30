@@ -34,6 +34,29 @@ class TestReader < Nokogiri::TestCase
     assert_equal [false, false, nil, nil, true, nil], results
   end
 
+  # Issue #831
+  # Make sure that the reader doesn't block reading the entire input
+  def test_reader_blocking
+    rd, wr = IO.pipe()
+    node_out = nil
+    t = Thread.start do
+      reader = Nokogiri::XML::Reader(rd, 'UTF-8')
+      reader.each do |node|
+        node_out = node
+        break
+      end
+    end
+    sleep(1)              # sleep for one second to make sure the reader will actually block for input
+    wr.puts "<foo>"
+    wr.puts "<bar/>" * 10000
+    wr.flush
+    res = t.join(5)    # wait 5 seconds for the thread to finish
+    wr.close
+    rd.close
+    refute_nil node_out, "Didn't read any nodes, exclude the trivial case"
+    refute_nil res, "Reader blocks trying to read the entire stream"
+  end
+
   def test_reader_takes_block
     options = nil
     Nokogiri::XML::Reader(File.read(XML_FILE), XML_FILE) do |cfg|
@@ -319,12 +342,23 @@ class TestReader < Nokogiri::TestCase
   end
 
   def test_outer_xml
-    str = "<x><y>hello</y></x>"
-    reader = Nokogiri::XML::Reader.from_memory(str)
+    str = ["<x><y>hello</y></x>", "<y>hello</y>", "hello", "<y/>", "<x/>"]
+    reader = Nokogiri::XML::Reader.from_memory(str.first)
 
-    reader.read
+    xml = []
+    reader.map { |node| xml << node.outer_xml }
 
-    assert_equal str, reader.outer_xml
+    assert_equal str, xml
+  end
+
+  def test_outer_xml_with_empty_nodes
+    str = ["<x><y/></x>", "<y/>", "<x/>"]
+    reader = Nokogiri::XML::Reader.from_memory(str.first)
+
+    xml = []
+    reader.map { |node| xml << node.outer_xml }
+
+    assert_equal str, xml
   end
 
   def test_state
@@ -397,6 +431,39 @@ class TestReader < Nokogiri::TestCase
                   "http://base.example.org/base/",
                   "http://base.example.org/base/"],
                   reader.map {|n| n.base_uri })
+  end
+
+  def test_xlink_href_without_base_uri
+    reader = Nokogiri::XML::Reader(<<-eoxml)
+      <x xmlns:xlink="http://www.w3.org/1999/xlink">
+        <link xlink:href="#other">Link</link>
+        <other id="other">Linked Element</other>
+      </x>
+    eoxml
+  
+    reader.each do |node|
+      if node.node_type == Nokogiri::XML::Reader::TYPE_ELEMENT
+        if node.name == 'link'
+          assert_nil node.base_uri
+        end
+      end
+    end
+  end
+  
+  def test_xlink_href_with_base_uri
+    reader = Nokogiri::XML::Reader(<<-eoxml)
+      <x xml:base="http://base.example.org/base/"
+         xmlns:xlink="http://www.w3.org/1999/xlink">
+        <link xlink:href="#other">Link</link>
+        <other id="other">Linked Element</other>
+      </x>
+    eoxml
+  
+    reader.each do |node|
+      if node.node_type == Nokogiri::XML::Reader::TYPE_ELEMENT
+        assert_equal node.base_uri, "http://base.example.org/base/"
+      end
+    end
   end
 
   def test_read_from_memory
