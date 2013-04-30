@@ -13,7 +13,8 @@ module Nokogiri
         children = if ctx
                      # Fix for issue#490
                      if Nokogiri.jruby?
-                       ctx.parse("<root>#{tags}</root>").xpath("/root/node()")
+                       # fix for issue #770
+                       ctx.parse("<root #{namespace_declarations(ctx)}>#{tags}</root>").children
                      else
                        ctx.parse(tags)
                      end
@@ -92,6 +93,14 @@ module Nokogiri
       end
 
       private
+
+      # fix for issue 770
+      def namespace_declarations ctx
+        ctx.namespace_scopes.map do |namespace|
+          prefix = namespace.prefix.nil? ? "" : ":#{namespace.prefix}"
+          %Q{xmlns#{prefix}="#{namespace.href}"}
+        end.join ' '
+      end
 
       def coerce data
         return super unless String === data

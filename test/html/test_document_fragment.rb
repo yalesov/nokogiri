@@ -24,6 +24,11 @@ module Nokogiri
         end
       end
 
+      def test_colons_are_not_removed
+        doc = Nokogiri::HTML::DocumentFragment.parse("<span>3:30pm</span>")
+        assert_match(/3:30/, doc.to_s)
+      end
+
       def test_parse_encoding
         fragment = "<div>hello world</div>"
         f = Nokogiri::HTML::DocumentFragment.parse fragment, 'ISO-8859-1'
@@ -190,9 +195,11 @@ module Nokogiri
       def test_to_xhtml
         doc = "<span>foo<br></span><span>bar</span>"
         fragment = Nokogiri::HTML::Document.new.fragment(doc)
-        if !Nokogiri.jruby? && Nokogiri::VERSION_INFO['libxml']['loaded'] >= "2.7.0"
+        if Nokogiri.jruby? || Nokogiri::VERSION_INFO['libxml']['loaded'] >= "2.7.0"
           assert_equal "<span>foo<br /></span><span>bar</span>", fragment.to_xhtml
         else
+          # FIXME: why are we doing this ? this violates the spec,
+          # see http://www.w3.org/TR/xhtml1/#C_2
           assert_equal "<span>foo<br></span><span>bar</span>", fragment.to_xhtml
         end
       end

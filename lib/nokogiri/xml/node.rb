@@ -251,14 +251,13 @@ module Nokogiri
       ###
       # Get the attribute value for the attribute +name+
       def [] name
-        return nil unless key?(name.to_s)
         get(name.to_s)
       end
 
       ###
       # Set the attribute value for the attribute +name+ to +value+
       def []= name, value
-        set name.to_s, value
+        set name.to_s, value.to_s
       end
 
       ###
@@ -271,9 +270,9 @@ module Nokogiri
       def add_child node_or_tags
         node_or_tags = coerce(node_or_tags)
         if node_or_tags.is_a?(XML::NodeSet)
-          node_or_tags.each { |n| add_child_node n }
+          node_or_tags.each { |n| add_child_node_and_reparent_attrs n }
         else
-          add_child_node node_or_tags
+          add_child_node_and_reparent_attrs node_or_tags
         end
         node_or_tags
       end
@@ -299,20 +298,7 @@ module Nokogiri
       def add_previous_sibling node_or_tags
         raise ArgumentError.new("A document may not have multiple root nodes.") if parent.is_a?(XML::Document) && !node_or_tags.is_a?(XML::ProcessingInstruction)
 
-        node_or_tags = coerce(node_or_tags)
-        if node_or_tags.is_a?(XML::NodeSet)
-          if text?
-            pivot = Nokogiri::XML::Node.new 'dummy', document
-            add_previous_sibling_node pivot
-          else
-            pivot = self
-          end
-          node_or_tags.each { |n| pivot.send :add_previous_sibling_node, n }
-          pivot.unlink if text?
-        else
-          add_previous_sibling_node node_or_tags
-        end
-        node_or_tags
+        add_sibling :previous, node_or_tags
       end
 
       ###
@@ -325,20 +311,7 @@ module Nokogiri
       def add_next_sibling node_or_tags
         raise ArgumentError.new("A document may not have multiple root nodes.") if parent.is_a?(XML::Document)
         
-        node_or_tags = coerce(node_or_tags)
-        if node_or_tags.is_a?(XML::NodeSet)
-          if text?
-            pivot = Nokogiri::XML::Node.new 'dummy', document
-            add_next_sibling_node pivot
-          else
-            pivot = self
-          end
-          node_or_tags.reverse_each { |n| pivot.send :add_next_sibling_node, n }
-          pivot.unlink if text?
-        else
-          add_next_sibling_node node_or_tags
-        end
-        node_or_tags
+        add_sibling :next, node_or_tags
       end
 
       ####
@@ -388,9 +361,9 @@ module Nokogiri
         node_or_tags = coerce(node_or_tags)
         children.unlink
         if node_or_tags.is_a?(XML::NodeSet)
-          node_or_tags.each { |n| add_child_node n }
+          node_or_tags.each { |n| add_child_node_and_reparent_attrs n }
         else
-          add_child_node node_or_tags
+          add_child_node_and_reparent_attrs node_or_tags
         end
         node_or_tags
       end
@@ -403,17 +376,22 @@ module Nokogiri
       #
       # Also see related method +swap+.
       def replace node_or_tags
+        # We cannot replace a text node directly, otherwise libxml will return
+        # an internal error at parser.c:13031, I don't know exactly why
+        # libxml is trying to find a parent node that is an element or document
+        # so I can't tell if this is bug in libxml or not. issue #775.
+        if text?
+          replacee = Nokogiri::XML::Node.new 'dummy', document
+          add_previous_sibling_node replacee
+          unlink
+          return replacee.replace node_or_tags
+        end
+
         node_or_tags = coerce(node_or_tags)
+
         if node_or_tags.is_a?(XML::NodeSet)
-          if text?
-            replacee = Nokogiri::XML::Node.new 'dummy', document
-            add_previous_sibling_node replacee
-            unlink
-          else
-            replacee = self
-          end
-          node_or_tags.each { |n| replacee.add_previous_sibling n }
-          replacee.unlink
+          node_or_tags.each { |n| add_previous_sibling n }
+          unlink
         else
           replace_node node_or_tags
         end
@@ -761,12 +739,7 @@ module Nokogiri
       # See Node#write_to for a list of +options+.  For formatted output,
       # use Node#to_xhtml instead.
       def to_html options = {}
-        # FIXME: this is a hack around broken libxml versions
-        return dump_html if Nokogiri.uses_libxml? && %w[2 6] === LIBXML_VERSION.split('.')[0..1]
-
-        options[:save_with] |= SaveOptions::DEFAULT_HTML if options[:save_with]
-        options[:save_with] = SaveOptions::DEFAULT_HTML unless options[:save_with]
-        serialize(options)
+        to_format SaveOptions::DEFAULT_HTML, options
       end
 
       ###
@@ -787,12 +760,7 @@ module Nokogiri
       #
       # See Node#write_to for a list of +options+
       def to_xhtml options = {}
-        # FIXME: this is a hack around broken libxml versions
-        return dump_html if Nokogiri.uses_libxml? && %w[2 6] === LIBXML_VERSION.split('.')[0..1]
-
-        options[:save_with] |= SaveOptions::DEFAULT_XHTML if options[:save_with]
-        options[:save_with] = SaveOptions::DEFAULT_XHTML unless options[:save_with]
-        serialize(options)
+        to_format SaveOptions::DEFAULT_XHTML, options
       end
 
       ###
@@ -835,11 +803,7 @@ module Nokogiri
       #
       # See Node#write_to for a list of +options+
       def write_html_to io, options = {}
-        # FIXME: this is a hack around broken libxml versions
-        return (io << dump_html) if Nokogiri.uses_libxml? && %w[2 6] === LIBXML_VERSION.split('.')[0..1]
-
-        options[:save_with] ||= SaveOptions::DEFAULT_HTML
-        write_to io, options
+        write_format_to SaveOptions::DEFAULT_HTML, io, options
       end
 
       ###
@@ -847,11 +811,7 @@ module Nokogiri
       #
       # See Node#write_to for a list of +options+
       def write_xhtml_to io, options = {}
-        # FIXME: this is a hack around broken libxml versions
-        return (io << dump_html) if Nokogiri.uses_libxml? && %w[2 6] === LIBXML_VERSION.split('.')[0..1]
-
-        options[:save_with] ||= SaveOptions::DEFAULT_XHTML
-        write_to io, options
+        write_format_to SaveOptions::DEFAULT_XHTML, io, options
       end
 
       ###
@@ -898,6 +858,43 @@ module Nokogiri
 
       private
 
+      def add_sibling next_or_previous, node_or_tags
+        impl = (next_or_previous == :next) ? :add_next_sibling_node : :add_previous_sibling_node
+        iter = (next_or_previous == :next) ? :reverse_each          : :each
+
+        node_or_tags = coerce node_or_tags
+        if node_or_tags.is_a?(XML::NodeSet)
+          if text?
+            pivot = Nokogiri::XML::Node.new 'dummy', document
+            send impl, pivot
+          else
+            pivot = self
+          end
+          node_or_tags.send(iter) { |n| pivot.send impl, n }
+          pivot.unlink if text?
+        else
+          send impl, node_or_tags
+        end
+        node_or_tags
+      end
+
+      def to_format save_option, options
+        # FIXME: this is a hack around broken libxml versions
+        return dump_html if Nokogiri.uses_libxml? && %w[2 6] === LIBXML_VERSION.split('.')[0..1]
+
+        options[:save_with] |= save_option if options[:save_with]
+        options[:save_with] = save_option unless options[:save_with]
+        serialize(options)
+      end
+
+      def write_format_to save_option, io, options
+        # FIXME: this is a hack around broken libxml versions
+        return (io << dump_html) if Nokogiri.uses_libxml? && %w[2 6] === LIBXML_VERSION.split('.')[0..1]
+
+        options[:save_with] ||= save_option
+        write_to io, options
+      end
+
       def extract_params params # :nodoc:
         # Pop off our custom function handler if it exists
         handler = params.find { |param|
@@ -941,6 +938,15 @@ Requires a Node, NodeSet or String argument, and cannot accept a #{data.class}.
       def inspect_attributes
         [:name, :namespace, :attribute_nodes, :children]
       end
+
+      def add_child_node_and_reparent_attrs node
+        add_child_node node
+        node.attribute_nodes.find_all { |a| a.name =~ /:/ }.each do |attr_node|
+          attr_node.remove
+          node[attr_node.name] = attr_node.value
+        end
+      end
+
     end
   end
 end

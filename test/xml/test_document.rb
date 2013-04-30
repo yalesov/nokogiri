@@ -16,9 +16,61 @@ module Nokogiri
         @xml = Nokogiri::XML.parse(File.read(XML_FILE), XML_FILE)
       end
 
+      def test_dtd_with_empty_internal_subset
+        doc = Nokogiri::XML <<-eoxml
+<?xml version="1.0"?>
+<!DOCTYPE people >
+<people>
+</people>
+        eoxml
+        assert doc.root
+      end
+
+      # issue #838
+      def test_document_with_invalid_prolog
+        doc = Nokogiri::XML '<? ?>'
+        assert_empty doc.content
+      end
+
+      # issue #837
+      def test_document_with_refentity
+        doc = Nokogiri::XML '&amp;'
+        assert_equal '', doc.content
+      end
+
+      # issue #835
+      def test_manually_adding_reference_entities
+        d = Nokogiri::XML::Document.new
+        root = Nokogiri::XML::Element.new('bar', d)
+        txt = Nokogiri::XML::Text.new('foo', d)
+        ent = Nokogiri::XML::EntityReference.new(d, '#8217')
+        root << txt
+        root << ent
+        d << root
+        assert_match d.to_html, /&#8217;/
+      end
+
+      def test_document_with_initial_space
+        doc = Nokogiri::XML(" <?xml version='1.0' encoding='utf-8' ?><first \>")
+        assert_equal 2, doc.children.size
+      end
+
       def test_root_set_to_nil
         @xml.root = nil
         assert_equal nil, @xml.root
+      end
+
+      def test_ignore_unknown_namespace
+        doc = Nokogiri::XML(<<-eoxml)
+        <xml>
+          <unknown:foo xmlns='http://hello.com/' />
+          <bar />
+        </xml>
+        eoxml
+        if Nokogiri.jruby?
+          refute doc.xpath('//foo').first.namespace # assert that the namespace is nil
+        end
+        refute_empty doc.xpath('//bar'), "bar wasn't found in the document" # bar should be part of the doc
       end
 
       def test_collect_namespaces
@@ -683,6 +735,18 @@ module Nokogiri
         assert_match %r{foo attr}, doc.to_xml
       end
 
+      # issue #785
+      def test_attribute_decoration
+        decorator = Module.new do
+          def test_method
+          end
+        end
+
+        util_decorate(@xml, decorator)
+
+        assert @xml.search('//@street').first.respond_to?(:test_method)
+      end
+
       def test_subset_is_decorated
         x = Module.new do
           def awesome!
@@ -716,26 +780,43 @@ module Nokogiri
         assert @xml.children.respond_to?(:awesome!)
       end
 
-      def test_java_integration
-        if Nokogiri.jruby?
+      if Nokogiri.jruby?
+        def wrap_java_document
           require 'java'
           factory = javax.xml.parsers.DocumentBuilderFactory.newInstance
           builder = factory.newDocumentBuilder
           document = builder.newDocument
           root = document.createElement("foo")
           document.appendChild(root)
-          noko_doc = Nokogiri::XML::Document.wrap(document)
-          assert_equal 'foo', noko_doc.root.name
+          Nokogiri::XML::Document.wrap(document)
+        end
+      end
 
-          noko_doc = Nokogiri::XML(<<eoxml)
+      def test_java_integration
+        skip("Ruby doesn't have the wrap method") unless Nokogiri.jruby?
+        noko_doc = wrap_java_document
+        assert_equal 'foo', noko_doc.root.name
+
+        noko_doc = Nokogiri::XML(<<eoxml)
 <foo xmlns='hello'>
   <bar xmlns:foo='world' />
 </foo>
 eoxml
-          dom = noko_doc.to_java
-          assert dom.kind_of? org.w3c.dom.Document
-          assert_equal 'foo', dom.getDocumentElement().getTagName()
-        end
+        dom = noko_doc.to_java
+        assert dom.kind_of? org.w3c.dom.Document
+        assert_equal 'foo', dom.getDocumentElement().getTagName()
+      end
+
+      def test_add_child
+        skip("Ruby doesn't have the wrap method") unless Nokogiri.jruby?
+        doc = wrap_java_document
+        doc.root.add_child "<bar />"
+      end
+
+      def test_can_be_closed
+        f = File.open XML_FILE
+        Nokogiri::XML f
+        f.close
       end
     end
   end

@@ -1,6 +1,6 @@
 module Nokogiri
   # The version of Nokogiri you are using
-  VERSION = '1.5.5'
+  VERSION = '1.5.9'
 
   class VersionInfo # :nodoc:
     def jruby?
@@ -52,6 +52,9 @@ module Nokogiri
         hash_info['libxml']['compiled']  = compiled_parser_version
         hash_info['libxml']['loaded']    = loaded_parser_version
         hash_info['warnings']            = warnings
+      elsif jruby?
+        hash_info['xerces']   = Nokogiri::XERCES_VERSION
+        hash_info['nekohtml'] = Nokogiri::NEKO_VERSION
       end
 
       hash_info

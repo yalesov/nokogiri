@@ -87,13 +87,16 @@ module Nokogiri
               if key =~ NCNAME_RE
                 ns_name = key.split(":", 2)[1]
                 elm.add_namespace_definition ns_name, v
-                next
+              else
+                elm[k.to_s] = v.to_s
               end
-              elm[k.to_s] = v.to_s
             }
           else
             elm.content = arg
           end
+        end
+        if ns = elm.namespace_definitions.find { |n| n.prefix.nil? or n.prefix == '' }
+          elm.namespace = ns
         end
         elm
       end
@@ -149,13 +152,15 @@ module Nokogiri
       # Non-prefixed default namespaces (as in "xmlns=") are not included
       # in the hash.
       #
-      # Note this is a very expensive operation in current implementation, as it
-      # traverses the entire graph, and also has to bring each node across the
-      # libxml bridge into a ruby object.
+      # Note that this method does an xpath lookup for nodes with
+      # namespaces, and as a result the order may be dependent on the
+      # implementation of the underlying XML library.
+      #
       def collect_namespaces
-        ns = {}
-        traverse { |j| ns.merge!(j.namespaces) }
-        ns
+        xpath("//namespace::*").inject({}) do |hash, ns|
+          hash[["xmlns",ns.prefix].compact.join(":")] = ns.href if ns.prefix != "xml"
+          hash
+        end
       end
 
       # Get the list of decorators given +key+

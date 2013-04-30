@@ -1,4 +1,85 @@
-== 1.5.5 / unreleased
+
+=== 1.5.9 / 2013年03月21日
+
+* Bugfixes
+
+  * Ensure that prefixed attributes are properly namespaced when reparented. #869
+  * Fix for inconsistent namespaced attribute access for SVG nested in HTML. #861
+  * (MRI) Fixed a memory leak in fragment parsing if nodes are not all subsequently reparented. #856
+
+
+=== 1.5.8 / 2013年03月19日
+
+* Bugfixes
+
+  * (JRuby) Fix EmptyStackException thrown by elements with xlink:href attributes and no base_uri #534, #805. (Thanks, Patrick Quinn and Brian Hoffman!)
+  * Fixes duplicate attributes issue introduced in 1.5.7. #865
+  * Allow use of a prefixed namespace on a root node using Nokogiri::XML::Builder #868
+
+
+=== 1.5.7 / 2013年03月18日
+
+* Features
+
+  * Windows support for Ruby 2.0.
+
+
+* Bugfixes
+
+  * SAX::Parser.parse_io throw an error when used with lower case encoding. #828
+  * (JRuby) Java Nokogiri is finally green (passes all tests) under 1.8 and 1.9 mode. High five everyone. #798, #705
+  * (JRuby) Nokogiri::XML::Reader broken (as a pull parser) on jruby - reads the whole XML document. #831
+  * (JRuby) JRuby hangs parsing "&amp;". #837
+  * (JRuby) JRuby NPE parsing an invalid XML instruction. #838
+  * (JRuby) Node#content= incompatibility. #839
+  * (JRuby) to_xhtml doesn't print the last slash for self-closing tags in JRuby. #834
+  * (JRuby) Adding an EntityReference after a Text node mangles the entity in JRuby. #835
+  * (JRuby) JRuby version inconsistency: nil for empty attributes. #818
+  * CSS queries for classes (e.g., ".foo") now treat all whitespace identically. #854
+  * Namespace behavior cleaned up and made consistent between JRuby and MRI. #846, #801 (Thanks, Michael Klein!)
+  * (MRI) SAX parser handles empty processing instructions. #845
+
+
+=== 1.5.6 / 2012年12月19日
+
+* Features
+
+  * XML::Document#collect_namespaces　メソッドのパフォーマンスを改善した。 #761 (ありがとう、Juergen Mangler!)
+  * SAX::Document#processing_instructionに新しいcallbackが追加 (ありがとう、Kitaiti Makoto!)
+  * Node#native_content= メソッドでエスケープされていない文字列をセットできるようにした。 #768
+  * 名前空間を付けて xpath 式を書く場合に、シンボルキーを使えるようにした。#729 (ありがとう、Ben Langfeld.)
+  * XML::Node#[]= メソッド内で受け取った引数を文字列に変換するようにした。#729 (ありがとう、Ben Langfeld.)
+  * bin/nokogiri コマンドが $stdin からドキュメントを読んで処理できるようにした。
+  * bin/nokogiri -e を指定することでコマンドラインプログラムを実行できるようにした。
+  * bin/nokogiri --version will print the Xerces and NekoHTML versions when ran with JRuby.
+
+
+* Bugfixes
+
+  * Nokogiri はこのバージョンからXSLT変換のエラーを検出するようになった。#731 (ありがとう、Justin Fitzsimmons!)
+  * Don't throw an Error when trying to replace top-level text node in DocumentFragment. #775
+  * SAXパーザに不正なエンコーディングに渡された場合はArgumentErrorを投げるようにした。#756 (ありがとう、Bradley Schaefer!)
+  * (JRuby) XML宣言の前にスペースがあると、ドキュメントのパーズに失敗する。(#748の修正でこれもなおっている) #790
+  * (JRuby) Nokogiri::XML::Node#content のJRubyの振る舞いがCRubyと同じではない。#794, #797
+  * (JRuby) で '#' で始まる文字列を名前とする EntityReference を作ろうとすると INVALID_CHARACTER_ERR という例外がはっせいする。 #719
+  * (JRuby) では Nodeのサブクラスのnamespaceを正しく文字列に変換しない。 #715
+  * (JRuby) Node#contentがこのバージョンから改行コードを正しく表示するようになった。#737 (ありがとう、Piotr Szmielew!)
+  * (JRuby) recover optionが指定されている場合は宣言の無いネームスペースを無視するようにした。#748
+  * (JRuby) ネームスペースを検出するXPathが続けて実行されても例外を投げてはいけない。#764
+  * (JRuby) XMLを表示(出力)する際のホワイトスペースの扱いをlibxml2バージョンとさらに同様になるようにした。#771
+  * (JRuby) ネームスペース付きの属性を含むXMLドキュメントを文字列でbuilderに追加しようとすると失敗する。#770
+  * (JRuby) Nokogiri::XML::Document#wrapを使って生成したドキュメントに << でノードを追加しようとすると
+     undefined method `length' for nil:NilClassのエラーが発生する #781
+  * (JRuby) 開いているファイルのデスクリプタを閉じようとすると、"bad file descriptor" が発生する。#495
+  * (JRuby) JRuby/CRuby incompatibility for attribute decorators. #785
+  * (JRuby) Issues parsing valid XML with no internal subset in the DTD. #547, #811
+  * (JRuby) Issues parsing valid node content when it contains colons. #728
+  * (JRuby) Correctly parse the doc type of html documents. #733
+  * (JRuby) Include dtd in the xml output when a builder is used with create_internal_subset. #751
+  * (JRuby) builder requires textwrappers for valid utf8 in jruby, not in mri. #784
+
+
+=== 1.5.5 / ２０１２年６月２４日
 
 * Features
 
@@ -17,9 +98,10 @@
   * JRuby で Nokogiri::XML::Node を継承したクラスを定義すると、namespace が表示されない。 #695
   * JRuby で RDF::RDFXML::Writer をインスタンス化しようとすると NAMESPACE_ERR (org.w3c.dom.DOMException) が発生する. #683
   * JRuby で xpath に namespaces を指定すると例外が発生する. #493
+  * JRuby の Entity 解決は C version の Nokogiri と同じ結果にならないといけない。#704, #647, #703
 
 
-== 1.5.4 / ２０１２年６月１２日
+=== 1.5.4 / ２０１２年６月１２日
 
 * Features
 
@@ -33,7 +115,7 @@
   * DocumentFragment をベースにしてコメントノードを作ったときに Segmentation fault する。 #677, #678.
   * at() と search() メソッドで '.' をxpathとして扱う。 #690
 
-  * [MRI, Security] XML パース時のディフォルトのオプションを nonet に変更。これにより、ディフォルトでは
+  * (MRI, Security) XML パース時のディフォルトのオプションを nonet に変更。これにより、ディフォルトでは
     ドキュメントパース時にネットワーク接続を行わないようにし、XXE 脆弱性に対応した。#693
 
     パース時にネットワークに接続して外部のドキュメントを見にいかせたい場合には、以下のように `nonoet` オプションを設定する:
@@ -43,7 +125,7 @@
     ここに、自分ならではの二重否定のジョークをうめこむとなおよし。
 
 
-== 1.5.3 / ２０１２年６月１日
+=== 1.5.3 / ２０１２年６月１日
 
 * Features
 
@@ -63,20 +145,20 @@
   * Nokogiri::XML::Attribute が JRuby 上で　nil namespace を返す　#647
   * Nokogiri::XML::Node#namespace= メソッドが JRuby　上で prefix
   　が無い namespace を設定できない #648
-  * [JRuby] 1.9 モードで rake を実行するとデッドロックを引き起こす #571
+  * (JRuby) 1.9 モードで rake を実行するとデッドロックを引き起こす #571
   * HTML::Document#meta_encoding does not raise exception on docs with
     malformed content-type. #655
   * Fixing segfault related to unsupported encodings in in-context
     parsing on 1.8.7. #643
-  * [JRuby] Concurrency issue in XPath parsing. #682
+  * (JRuby) Concurrency issue in XPath parsing. #682
 
 
-== 1.5.2 / 2012-03-09
+=== 1.5.2 / 2012-03-09
 
 Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, #632.
 
 
-== 1.5.1 / 2012年3月9日
+=== 1.5.1 / 2012年3月9日
 
 * 新機能
 
@@ -118,10 +200,11 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
   * Do not allow multiple root nodes. #550
   * Fixes for custom XPath functions. #605, #606 (thanks, Juan Wajnerman!)
   * Node#to_xml does not override :save_with if it is provided. #505
-  * Node#set is a private method [JRuby]. #564 (thanks, Nick Sieger!)
+  * Node#set is a private method (JRuby). #564 (thanks, Nick Sieger!)
   * C14n cleanup and Node#canonicalize (thanks, Ivan Pirlik!) #563
 
-== 1.5.0 / 2011年7月1日
+
+=== 1.5.0 / 2011年7月1日
 
 * 註
 
@@ -141,7 +224,7 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
   * <meta charset="..."> を認識するようになった.
 
 
-== 1.5.0 beta3 ２０１０年１２月２日
+=== 1.5.0 beta3 ２０１０年１２月２日
 
 * 註
 
@@ -152,13 +235,15 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
 
   * Node#inner_textはnilを返さなくなった. (JRuby) #264
 
-== 1.5.0 beta2 ２０１０年７月３０日
+
+=== 1.5.0 beta2 ２０１０年７月３０日
 
 * 註
 
   * 1.4.3からの変更点を参照
 
-== 1.5.0 beta1 ２０１０年５月２２日
+
+=== 1.5.0 beta1 ２０１０年５月２２日
 
 * 註
 
@@ -170,11 +255,13 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
   * LibXML 2.6.16および古いバージョンは非推奨. インストールできない.
   * FFIサポートは削除された.
 
+
 === 1.4.7 / 2011年7月1日
 
 * バグの修正
 
   * エンコーディング宣言のないHTMLファイルで部分的に重複したドキュメントが生成される問題を修正した. #478
+
 
 === 1.4.6 / 2011年6月19日
 
@@ -182,6 +269,7 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
 
   * このバージョンは、1.4.5と機能的に同じです
   * Rubyの1.8.6のサポートが復元されている
+
 
 === 1.4.5 / 未リリース
 
@@ -193,11 +281,12 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
 
   * Node#serialize とその仲間達はSaveOptionオブジェクトを受け入れる
   * Nokogiri::CSS::Parser has-a Nokogiri::CSS::Tokenizer
-  * [JRUBY+FFIのみ] 「弱い参照」はスレッドセーフになった. #355
+  * (JRUBY+FFIのみ) 「弱い参照」はスレッドセーフになった. #355
   * HTML::SAX::Parserから呼ばれるstart_element()コールバックのattributes引数はHTML::XML::Parserによるエミュレートコールバックと同じく連想配列になった.  rel. #356
   * HTML::SAX::Parserのparse*()メソッドはXML::SAX::Parser同様に渡されたブロックをコールバックするようになった.
   * HTMLパーサーのエンコーディング判定をlibxml2の仕様を超えて拡張・改善した. (XML宣言のencodingを認識、非ASCII文字出現後のmetaタグも文字化けを生じずに反映)
   * Document#remove_namespaces! は名前空間付きの属性に対応した. #396
+
 
 === 1.4.4 ２０１０年１１月１５日
 
@@ -225,6 +314,7 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
   * libxml2 in-contextの解析バグの処置　 #362
   * フレグメント内のノードの中にあるNodeSet#wrapの修正　#331
 
+
 === 1.4.3 ２０１０年７月２８日
 
 * 新しい機能
@@ -247,6 +337,7 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
   * HTML::DocumentFragment が文字列に存在するエンコードを使用　#305
   * CSS3の間接セレクタ"E ~ F G"がXPathの"//F//G[preceding-sibling::E]"へと
     誤変換されてしまうのを修正
+
 
 === 1.4.2 ２０１０年５月２２日
 
@@ -298,6 +389,7 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
     1.1.26にDLLsを標準装備しています。このリリース以前にも既にDLLsはlibxml
     2.7.3 と libxslt 1.1.24に標準装備済み。
 
+
 === 1.4.1 ２００９年１２月１０日
 
 * 新しい機能
@@ -333,6 +425,7 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
   * XSLT#apply_toは "output method"の値を使用する（richardlehaneに感謝）
   * 新しい文字列の先頭にくるテキストノードを含んだフレグメントが 正確に
     解析出来るようになった　GH #178
+
 
 === 1.4.0 ２００９年１０月３０日
 
@@ -379,6 +472,7 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
 
   * Hpricot用の互換性レイヤーを削除
 
+
 === 1.3.3 / ２００９年７月２６日
 
 * 新しい機能
@@ -399,6 +493,7 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
 * 廃棄予定
 
   * Hpricotの互換性レイヤーがNokogiriの1.4.0で除去される予定
+
 
 === 1.3.2 / ２００９年６月２２日
 
@@ -425,12 +520,14 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
   * Nokogiri::XML::SAX::Document#end_element_nsは廃棄予定なので
     Nokogiri::XML::SAX::Document#end_element_namespaceを代わりに使用して下さい
 
+
 === 1.3.1 / ２００９年６月７日
 
 * バグの修正
 
   * extconf.rb は任意のRelaxNGとSchemaの機能を探すようになった
   * ドキュメントのノードキャッシュに名前空間のノードが入るようになった
+
 
 === 1.3.0 / ２００９年５月３０日
 
@@ -485,6 +582,7 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
   * Node#before/after/inner_html=で値なしのHTML属性が受け入れられなかった問題を
     修正　(GH#35)
 
+
 === 1.2.3 / ２００９年３月２２日
 
 * バグの修正
@@ -495,6 +593,7 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
   * Nokogiri::HTMLは文字列がブランクの時、空のドキュメントで返す GH#11
   * 子ノードを付加する事で、重複した名前空間の宣言を取り除く LH#67
   * ビルダ方法はハッシュを第二引数とする
+
 
 === 1.2.2 / ２００９年３月１４日
 
@@ -531,6 +630,7 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
   * CSS のセレクターのスペースを修正
   * Ruby 1.9 のStringのエンコードを修正 （角谷さんに感謝！）
 
+
 === 1.2.0 / ２００９年２月２２日
 
 * 新しい機能
@@ -565,6 +665,7 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
 
   * Nokogiri::HTML.fragment は XML::DocumentFragment (LH #32)で返す
 
+
 === 1.1.1
 
 * 新しい機能
@@ -580,6 +681,7 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
   * CSS::SelectorHandler と XML::XPathHandler を除去
   * XML::Node#attributes が Attr node を value値に返す
   * XML::NodeSet が to_xml へ実行
+
 
 === 1.1.0
 
@@ -597,6 +699,7 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
   * XML::Node#dup が引数任意のdepthを取る 
   * XML::Node#add_previous_sibling が新しい兄弟ノードで返す
 
+
 === 1.0.7
 
 * バグの修正
@@ -608,6 +711,7 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
   * ENV['PATH'] に付加せれる代わりに先頭へデータ挿入される
   * 複雑な CSS 内のバグを修正完了 :not selector ではありません
 
+
 === 1.0.6
 
 * 5つの修正
@@ -618,6 +722,7 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
   * CSS が Node#search 経由で検索し、常時対応する事が出来るようになった
   * CSS より XPath 変換がキャッシュに入れられるようになった
 
+
 === 1.0.5
 
 * バグフィックス
@@ -627,6 +732,7 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
   * Windows 内で ENV['PATH'] が存在しない場合でも、存在出来るように設定完了
   * Document 内の NodeSet#[] の結果をキャッシュする
 
+
 === 1.0.4
 
 * バグフィックス
@@ -635,6 +741,7 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
   * メモリリークに接続
   * Builderブロックが取り囲んでいるコンテキストから
     メソッドの呼び出しをする事が出来る
+
 
 === 1.0.3
 
@@ -646,11 +753,13 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
   * 1.8.5互換性の為の RARRAY_LEN 除去
   * inner_html 修正済み (Yahuda に感謝)
 
+
 === 1.0.2
 
 * 1つのバグ修正
 
   * extconf.rb は frex や racc を調べないはず
+
 
 === 1.0.1
 
@@ -658,6 +767,7 @@ Repackaging of 1.5.1 with a gemspec that is compatible with older Rubies. #631, 
 
   * extconf.rb が libdir や prefix を検索しない事を確認済み
     それによって、ports libxml/ruby が正しくリンクする (lucsky に感謝!)
+
 
 === 1.0.0 / 2008-07-13
 

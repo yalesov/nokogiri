@@ -173,7 +173,12 @@ module Nokogiri
             end
           end
 
-          assert_equal doc.errors.length, @parser.document.errors.length
+          # when using JRuby Nokogiri, more errors will be generated as the DOM
+          # parser continue to parse an ill formed document, while the sax parser
+          # will stop at the first error
+          unless Nokogiri.jruby?
+            assert_equal doc.errors.length, @parser.document.errors.length
+          end
         end
 
         def test_parse_with_memory_argument
@@ -189,8 +194,17 @@ module Nokogiri
         end
 
         def test_parse_io
+          call_parse_io_with_encoding 'UTF-8'
+        end
+
+        # issue #828
+        def test_parse_io_lower_case_encoding
+          call_parse_io_with_encoding 'utf-8'
+        end
+
+        def call_parse_io_with_encoding encoding
           File.open(XML_FILE, 'rb') { |f|
-            @parser.parse_io(f, 'UTF-8')
+            @parser.parse_io(f, encoding)
           }
           assert(@parser.document.cdata_blocks.length > 0)
           if RUBY_VERSION =~ /^1\.9/
@@ -250,6 +264,11 @@ module Nokogiri
           assert_raises(ArgumentError) { @parser.parse_memory(nil) }
         end
 
+        def test_bad_encoding_args
+          assert_raises(ArgumentError) { XML::SAX::Parser.new(Doc.new, 'not an encoding') }
+          assert_raises(ArgumentError) { @parser.parse_io(StringIO.new('<root/>'), 'not an encoding')}
+        end
+
         def test_ctag
           @parser.parse_memory(<<-eoxml)
             <p id="asdfasdf">
@@ -306,6 +325,15 @@ module Nokogiri
           eoxml
           assert_equal [["p", [['xmlns:foo', 'http://foo.example.com/']]]],
                        @parser.document.start_elements
+        end
+
+        def test_processing_instruction
+          @parser.parse_memory(<<-eoxml)
+            <?xml-stylesheet href="a.xsl" type="text/xsl"?>
+            <?xml version="1.0"?>
+          eoxml
+          assert_equal [['xml-stylesheet', 'href="a.xsl" type="text/xsl"']],
+                       @parser.document.processing_instructions
         end
 
         if Nokogiri.uses_libxml? # JRuby SAXParser only parses well-formed XML documents

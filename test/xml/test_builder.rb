@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 require "helper"
 
 module Nokogiri
@@ -9,6 +11,12 @@ module Nokogiri
         }.to_xml
         doc = Nokogiri.XML xml
         assert_equal 'world', doc.root['abcDef']
+      end
+
+      def test_builder_with_utf8_text
+        text = "test ﺵ "
+        doc = Nokogiri::XML::Builder.new(:encoding => "UTF-8") { |xml| xml.test text }.doc
+        assert_equal text, doc.content
       end
 
       def test_builder_escape
@@ -103,6 +111,21 @@ module Nokogiri
         assert_equal 'bar', doc.at('foo|baz', 'foo' => 'bar').namespace.href
       end
 
+      def test_dtd_in_builder_output
+        builder = Nokogiri::XML::Builder.new do |xml|
+          xml.doc.create_internal_subset(
+                                         'html',
+                                         "-//W3C//DTD HTML 4.01 Transitional//EN",
+                                         "http://www.w3.org/TR/html4/loose.dtd"
+                                         )
+          xml.root do
+            xml.foo
+          end
+        end
+        assert_match(/<!DOCTYPE html PUBLIC "-\/\/W3C\/\/DTD HTML 4.01 Transitional\/\/EN" "http:\/\/www.w3.org\/TR\/html4\/loose.dtd">/,
+                     builder.to_xml)
+      end
+
       def test_specify_namespace_nested
         b = Nokogiri::XML::Builder.new { |xml|
           xml.root('xmlns:foo' => 'bar') do
@@ -120,11 +143,27 @@ module Nokogiri
         assert_equal 'bar', doc.at('foo|baz', 'foo' => 'bar').namespace.href
       end
 
+      def test_specified_namespace_postdeclared
+        doc = Nokogiri::XML::Builder.new { |xml|
+          xml.a do
+            xml[:foo].b("xmlns:foo" => "bar")
+          end
+        }.doc
+        a = doc.at('a')
+        assert_equal({}, a.namespaces)
+
+        b = doc.at_xpath('//foo:b', {:foo=>'bar'})
+        assert b
+        assert_equal({"xmlns:foo"=>"bar"}, b.namespaces)
+        assert_equal("b", b.name)
+        assert_equal("bar", b.namespace.href)
+      end
+
       def test_specified_namespace_undeclared
         Nokogiri::XML::Builder.new { |xml|
           xml.root do
             assert_raises(ArgumentError) do
-              xml[:foo]
+              xml[:foo].bar
             end
           end
         }
@@ -207,6 +246,25 @@ module Nokogiri
 
         assert_equal ["aaa"],       builder.doc.at_css("root").children.collect(&:name)
         assert_equal ["bbb","ccc"], builder.doc.at_css("aaa").children.collect(&:name)
+      end
+
+      def test_raw_xml_append_with_namespaces
+        doc = Nokogiri::XML::Builder.new do |xml|
+          xml.root("xmlns:foo" => "x", "xmlns" => "y") do
+            xml << '<Element foo:bar="bazz"/>'
+          end
+        end.doc
+
+        el = doc.at 'Element'
+        assert_not_nil el
+
+        assert_equal 'y', el.namespace.href
+        assert_nil el.namespace.prefix
+
+        attr = el.attributes["bar"]
+        assert_not_nil attr
+        assert_not_nil attr.namespace
+        assert_equal "foo", attr.namespace.prefix
       end
 
       def test_cdata
