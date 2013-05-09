@@ -1,3 +1,25 @@
+ruby-nokogiri (1.5.9-1) unstable; urgency=low
+
+  * New upstream version
+  * debian/rules:
+    + create empty file missing from the archive for the purpose of tests
+  * debian/copyright:
+    + update my email address and year
+  * debian/control:
+    + update my email address
+    + bump Standars-Version to 3.9.4 (no changes needed)
+    + remove obsolete DM-Upload-Allowed flag
+    + use canonical anonscm.debian.org URLs for Vcs-* fields
+    + remove obsolete transitional packages
+  * debian/source:
+    + remove lintian-overrides, about transtional packages
+  * debian/patches/:
+    + remove include_missing_test_document_url_directory.patch, missing file
+      added upstream
+    + add fix_tests_assert_match.patch to make tests pass with minitest gem
+
+ -- Cédric Boutillier <boutil@debian.org>  Fri, 10 May 2013 01:05:44 +0200
+
 ruby-nokogiri (1.5.5-1) unstable; urgency=low
 
   * New upstream version
