@@ -19,6 +19,13 @@ override_dh_installman:
 	pod2man --center "" --release "" --name NOKOGIRI --utf8 debian/nokogiri.1.pod man/nokogiri.1
 	dh_installman
 
+# test/files/bogus.xml missing from the gem
+# https://github.com/sparklemotion/nokogiri/issues/896
+override_dh_auto_build:
+	touch test/files/bogus.xml
+	dh_auto_build
+
 override_dh_auto_clean:
 	rm -rf man/
+	rm -f test/files/bogus.xml
 	dh_auto_clean
