@@ -1,0 +1,40 @@
+Description: fix assert_match tests to make them work with minitest gem
+ In assert_match of minitest gem, first parameter is converted to Regexp, and
+ the second is expected to be a String. Parameters have to be exchanged.
+Author: Cédric Boutillier <boutil@debian.org>
+Bug: https://github.com/sparklemotion/nokogiri/pull/900
+Last-Update: 2013-05-09
+
+--- a/test/xml/test_document.rb
++++ b/test/xml/test_document.rb
+@@ -47,7 +47,7 @@
+         root << txt
+         root << ent
+         d << root
+-        assert_match d.to_html, /&#8217;/
++        assert_match /&#8217;/, d.to_html
+       end
+ 
+       def test_document_with_initial_space
+--- a/test/xml/test_entity_reference.rb
++++ b/test/xml/test_entity_reference.rb
+@@ -26,7 +26,7 @@
+         doc = Nokogiri::XML xml
+         lf_node = Nokogiri::XML::EntityReference.new(doc, "#xa")
+         doc.xpath('/item').first.add_child(lf_node)
+-        assert_match doc.to_xml, /&#xa;/
++        assert_match /&#xa;/, doc.to_xml
+       end
+     end
+ 
+--- a/test/xml/test_node.rb
++++ b/test/xml/test_node.rb
+@@ -830,7 +830,7 @@
+         ne = d1.root.xpath('//a').first.dup(1)
+         ne.content += "& < & > \" &"
+         d2.root << ne
+-        assert_match d2.to_s, /<a>&amp;&amp; &lt; &amp; &gt; " &amp;<\/a>/
++        assert_match /<a>&amp;&amp; &lt; &amp; &gt; " &amp;<\/a>/, d2.to_s
+       end
+ 
+       def test_content_after_appending_text
