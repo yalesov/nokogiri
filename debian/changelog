@@ -3,6 +3,7 @@ ruby-nokogiri (1.5.9-1) unstable; urgency=low
   * New upstream version
   * debian/rules:
     + create empty file missing from the archive for the purpose of tests
+    + install upstream changelog
   * debian/copyright:
     + update my email address and year
   * debian/control:
