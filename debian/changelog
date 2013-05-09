@@ -18,6 +18,7 @@ ruby-nokogiri (1.5.9-1) unstable; urgency=low
     + remove include_missing_test_document_url_directory.patch, missing file
       added upstream
     + add fix_tests_assert_match.patch to make tests pass with minitest gem
+  * update manpage nokogiri(1) to take into account new options
 
  -- Cédric Boutillier <boutil@debian.org>  Fri, 10 May 2013 01:05:44 +0200
 
