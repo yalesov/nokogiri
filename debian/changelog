@@ -1,3 +1,13 @@
+ruby-nokogiri (1.5.9-2) unstable; urgency=low
+
+  * Do not exclude test/xml/test_xinclude.rb from tests anymore
+  * debian/patches: add 2 patches to fix FTBFS (Closes: #714930)
+    + minitest5_support.patch: add support for MiniTest 5
+    + skip_test_reader_entity_reference_without_dtdload.patch: disable tests
+      failing with libxml2 2.9
+
+ -- Cédric Boutillier <boutil@debian.org>  Fri, 16 Aug 2013 23:19:16 +0200
+
 ruby-nokogiri (1.5.9-1) unstable; urgency=low
 
   * New upstream version
