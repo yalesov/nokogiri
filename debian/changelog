@@ -1,3 +1,10 @@
+ruby-nokogiri (1.5.9-3) unstable; urgency=low
+
+  * add deactivate_test_reader_blocking.patch, deactivating a test hanging on
+    kFreeBSD ports
+
+ -- Cédric Boutillier <boutil@debian.org>  Tue, 03 Sep 2013 01:14:52 +0200
+
 ruby-nokogiri (1.5.9-2) unstable; urgency=low
 
   * Do not exclude test/xml/test_xinclude.rb from tests anymore
