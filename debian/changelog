@@ -2,6 +2,7 @@ ruby-nokogiri (1.5.9-3) unstable; urgency=low
 
   * add deactivate_test_reader_blocking.patch, deactivating a test hanging on
     kFreeBSD ports
+  * build against gem2deb >= 0.5.0~ to add ruby2.0 and drop ruby1.8 support
 
  -- Cédric Boutillier <boutil@debian.org>  Tue, 03 Sep 2013 01:14:52 +0200
 
