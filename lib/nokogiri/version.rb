@@ -1,6 +1,6 @@
 module Nokogiri
   # The version of Nokogiri you are using
-  VERSION = '1.5.9'
+  VERSION = '1.6.0'
 
   class VersionInfo # :nodoc:
     def jruby?
@@ -23,6 +23,14 @@ module Nokogiri
 
     def libxml2?
       defined?(LIBXML_VERSION)
+    end
+
+    def libxml2_using_system?
+      ! libxml2_using_packaged?
+    end
+
+    def libxml2_using_packaged?
+      NOKOGIRI_USE_PACKAGED_LIBRARIES
     end
 
     def warnings
@@ -49,6 +57,13 @@ module Nokogiri
       if libxml2?
         hash_info['libxml']              = {}
         hash_info['libxml']['binding']   = 'extension'
+        if libxml2_using_packaged?
+          hash_info['libxml']['source']  = "packaged"
+          hash_info['libxml']['libxml2_path'] = NOKOGIRI_LIBXML2_PATH
+          hash_info['libxml']['libxslt_path'] = NOKOGIRI_LIBXSLT_PATH
+        else
+          hash_info['libxml']['source']  = "system"
+        end
         hash_info['libxml']['compiled']  = compiled_parser_version
         hash_info['libxml']['loaded']    = loaded_parser_version
         hash_info['warnings']            = warnings

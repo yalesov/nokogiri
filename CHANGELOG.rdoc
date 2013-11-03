@@ -1,3 +1,53 @@
+=== 1.6.0 / 2013-06-08
+
+This release was based on v1.5.10 and 1.6.0.rc1, and contains changes
+mentioned in both.
+
+* Deprecations
+
+  * Remove pre 1.9 monitoring from Travis.
+
+
+=== 1.6.0.rc1 / 2013-04-14
+
+This release was based on v1.5.9, and so does not contain any fixes
+mentioned in the notes for v1.5.10.
+
+* Notes
+
+  * mini_portile is now a runtime dependency
+  * Ruby 1.9.2 and higher now required
+
+
+* Features
+
+  * (MRI) Source code for libxml 2.8.0 and libxslt 1.2.26 is packaged
+    with the gem. These libraries are compiled at gem install time
+    unless the environment variable NOKOGIRI_USE_SYSTEM_LIBRARIES is
+    set. VERSION_INFO (also `nokogiri -v`) exposes whether libxml was
+    compiled from packaged source, or the system library was used.
+  * (Windows) libxml upgraded to 2.8.0
+
+
+* Deprecations
+
+  * Support for Ruby 1.8.7 and prior has been dropped
+
+
+=== 1.5.10 / 2013-06-07
+
+* Bugfixes
+
+  * (JRuby) Fix "null document" error when parsing an empty IO in jruby 1.7.3. #883
+  * (JRuby) Fix schema validation when XSD has DOCTYPE set to DTD. #861 (Thanks, Patrick Cheng!)
+  * (MRI) Fix segfault when there is no default subelement for an HTML node. #917
+
+
+* Notes
+
+  * Use rb_ary_entry instead of RARRAY_PTR (you know, for Rubinius). #877 (Thanks, Dirkjan Bussink!)
+  * Fix TypeError when running tests. #900 (Thanks, Cédric Boutillier!)
+
 
 === 1.5.9 / 2013-03-21
 
@@ -51,7 +101,7 @@
   * XML::Node#[]= stringifies values. #729 (Thanks, Ben Langfeld.)
   * bin/nokogiri will process a document from $stdin
   * bin/nokogiri -e will execute a program from the command line
-  * bin/nokogiri --version will print the Xerces and NekoHTML versions when ran with JRuby.
+  * (JRuby) bin/nokogiri --version will print the Xerces and NekoHTML versions.
 
 
 * Bugfixes
