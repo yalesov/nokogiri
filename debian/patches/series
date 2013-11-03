@@ -2,3 +2,4 @@ remove-annoying-warning.patch
 no-require-rubygems.patch
 skip_test_reader_entity_reference_without_dtdload.patch
 deactivate_test_reader_blocking.patch
+always_use_system_libraries.patch
