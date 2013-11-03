@@ -1,3 +1,18 @@
+ruby-nokogiri (1.6.0-1) unstable; urgency=low
+
+  * Team upload.
+  * New upstream release:
+    - Strip embedded code copy from upstream source.
+    - Update patches:
+      remove-annoying-warning.patch: refreshed;
+      fix_tests_assert_match.patch: deleted, merged upstream;
+      minitest5_support.patch: deleted, merged upstream.
+    - Add a patch to always use the system libraries.
+  * Stop fiddling test/files/bogus.xml now that its properly shipped
+    in upstream tarball.
+
+ -- Jérémy Bobbio <lunar@debian.org>  Sun, 03 Nov 2013 11:54:08 +0100
+
 ruby-nokogiri (1.5.9-3) unstable; urgency=low
 
   * add deactivate_test_reader_blocking.patch, deactivating a test hanging on
