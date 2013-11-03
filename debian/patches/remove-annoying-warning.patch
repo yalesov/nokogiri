@@ -2,9 +2,11 @@ Description: Remove annoying warning about the version of libxml used
 Author: Ryan Niebur <ryanryan52@gmail.com>
 Bug-Debian: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=546843
 Forwarded: not-needed
---- a/lib/nokogiri/version.rb
-+++ b/lib/nokogiri/version.rb
-@@ -28,11 +28,7 @@
+Index: git/lib/nokogiri/version.rb
+===================================================================
+--- git.orig/lib/nokogiri/version.rb	2013-11-03 11:47:24.422149897 +0100
++++ git/lib/nokogiri/version.rb	2013-11-03 11:48:37.348681267 +0100
+@@ -36,11 +36,7 @@
      def warnings
        return [] unless libxml2?
  

@@ -1,6 +1,4 @@
 remove-annoying-warning.patch
 no-require-rubygems.patch
-fix_tests_assert_match.patch
-minitest5_support.patch
 skip_test_reader_entity_reference_without_dtdload.patch
 deactivate_test_reader_blocking.patch
