@@ -47,7 +47,7 @@ module Nokogiri
         root << txt
         root << ent
         d << root
-        assert_match d.to_html, /&#8217;/
+        assert_match /&#8217;/, d.to_html
       end
 
       def test_document_with_initial_space
@@ -578,6 +578,11 @@ module Nokogiri
         assert xml.xml?
         set = xml.search('//employee')
         assert set.length > 0
+      end
+
+      def test_parsing_empty_io
+        doc = Nokogiri::XML.parse(StringIO.new(''))
+        refute_nil doc
       end
 
       def test_search_on_empty_documents

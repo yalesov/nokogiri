@@ -35,9 +35,13 @@ HOE = Hoe.spec 'nokogiri' do
   self.clean_globs += [
     'nokogiri.gemspec',
     'lib/nokogiri/nokogiri.{bundle,jar,rb,so}',
-    'lib/nokogiri/{1.8,1.9,2.0}',
+    'lib/nokogiri/{1.9,2.0}',
     # GENERATED_PARSER,
     # GENERATED_TOKENIZER
+  ]
+
+  self.extra_deps += [
+    ["mini_portile",    "~> 0.5.0"],
   ]
 
   self.extra_dev_deps += [
@@ -45,7 +49,6 @@ HOE = Hoe.spec 'nokogiri' do
     ["hoe-debugging",   ">= 1.0.3"],
     ["hoe-gemspec",     ">= 1.0"],
     ["hoe-git",         ">= 1.4"],
-    ["mini_portile",    ">= 0.2.2"],
     ["minitest",        "~> 2.2.2"],
     ["rake",            ">= 0.9"],
     ["rake-compiler",   "~> 0.8.0"],
@@ -58,7 +61,7 @@ HOE = Hoe.spec 'nokogiri' do
   else
     self.spec_extras = {
       :extensions => ["ext/nokogiri/extconf.rb"],
-      :required_ruby_version => '>= 1.8.7'
+      :required_ruby_version => '>= 1.9.2'
     }
   end
 
@@ -105,6 +108,21 @@ else
   require "rake/extensiontask"
 
   HOE.spec.files.reject! { |f| f =~ %r{\.(java|jar)$} }
+
+  windows_p = RbConfig::CONFIG['target_os'] == 'mingw32' || RbConfig::CONFIG['target_os'] =~ /mswin/
+
+  unless windows_p || java?
+    task gem_build_path do
+      add_file_to_gem "dependencies.yml"
+
+      dependencies = YAML.load_file("dependencies.yml")
+      %w[libxml2 libxslt].each do |lib|
+        version = dependencies[lib]
+        archive = File.join("ports", "archives", "#{lib}-#{version}.tar.gz")
+        add_file_to_gem archive
+      end
+    end
+  end
 
   Rake::ExtensionTask.new("nokogiri", HOE.spec) do |ext|
     ext.lib_dir = File.join(*['lib', 'nokogiri', ENV['FAT_DIR']].compact)
@@ -194,7 +212,7 @@ end
 
 desc "build a windows gem without all the ceremony."
 task "gem:windows" => "gem" do
-  cross_rubies = ["1.8.7-p358", "1.9.3-p194", "2.0.0-p0"]
+  cross_rubies = ["1.9.3-p194", "2.0.0-p0"]
   ruby_cc_version = cross_rubies.collect { |_| _.split("-").first }.join(":") # e.g., "1.8.7:1.9.2"
   rake_compiler_config_path = "#{ENV['HOME']}/.rake-compiler/config.yml"
 
