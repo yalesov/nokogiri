@@ -6,6 +6,7 @@ ruby-nokogiri (1.6.1+ds-1) UNRELEASED; urgency=medium
   * Mention in copyright file and README.source that the tarball is
     repacked to remove convenience copies
   * Add a dversionmangle option in debian/watch
+  * Bump Standards-Version to 3.9.5 (no changes needed)
 
  -- Cédric Boutillier <boutil@debian.org>  Sat, 11 Jan 2014 06:30:37 +0100
 

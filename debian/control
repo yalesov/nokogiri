@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Debian Ruby Extras Maintainers <pkg-ruby-extras-maintainers@lists.alioth.debian.org>
 Uploaders: Lucas Nussbaum <lucas@debian.org>, Cédric Boutillier <boutil@debian.org>
 Build-Depends: debhelper (>= 7.0.50~), gem2deb (>= 0.5.0~), libxml2-dev, libxslt-dev, ruby-minitest
-Standards-Version: 3.9.4
+Standards-Version: 3.9.5
 Vcs-Git: git://anonscm.debian.org/pkg-ruby-extras/ruby-nokogiri.git
 Vcs-Browser: http://anonscm.debian.org/?p=pkg-ruby-extras/ruby-nokogiri.git;a=summary
 Homepage: http://nokogiri.org
