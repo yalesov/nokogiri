@@ -1,4 +1,4 @@
-ruby-nokogiri (1.6.1+ds-1) UNRELEASED; urgency=medium
+ruby-nokogiri (1.6.1+ds-1) unstable; urgency=medium
 
   * Imported Upstream version 1.6.1+ds
     - version 1.6.1 fixes security issues CVE-2013-6460 CVE-2013-6461
@@ -8,7 +8,7 @@ ruby-nokogiri (1.6.1+ds-1) UNRELEASED; urgency=medium
   * Add a dversionmangle option in debian/watch
   * Bump Standards-Version to 3.9.5 (no changes needed)
 
- -- Cédric Boutillier <boutil@debian.org>  Sat, 11 Jan 2014 06:30:37 +0100
+ -- Cédric Boutillier <boutil@debian.org>  Sat, 11 Jan 2014 06:48:45 +0100
 
 ruby-nokogiri (1.6.0-1) unstable; urgency=low
 
