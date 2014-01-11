@@ -1,3 +1,11 @@
+ruby-nokogiri (1.6.1+ds-1) UNRELEASED; urgency=medium
+
+  * Imported Upstream version 1.6.1+ds
+    - version 1.6.1 fixes security issues CVE-2013-6460 CVE-2013-6461
+      (Closes: #734836)
+
+ -- Cédric Boutillier <boutil@debian.org>  Sat, 11 Jan 2014 06:30:37 +0100
+
 ruby-nokogiri (1.6.0-1) unstable; urgency=low
 
   * Team upload.
