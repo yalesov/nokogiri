@@ -1,6 +1,6 @@
 module Nokogiri
   # The version of Nokogiri you are using
-  VERSION = '1.6.0'
+  VERSION = '1.6.1'
 
   class VersionInfo # :nodoc:
     def jruby?
@@ -12,7 +12,7 @@ module Nokogiri
     end
 
     def loaded_parser_version
-      LIBXML_PARSER_VERSION.scan(/^(.*)(..)(..)$/).first.collect{ |j|
+      LIBXML_PARSER_VERSION.scan(/^(\d+)(\d\d)(\d\d)(?!\d)/).first.collect{ |j|
         j.to_i
       }.join(".")
     end

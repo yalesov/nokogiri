@@ -1,3 +1,11 @@
+=== 1.6.1 / 2013年12月14日
+
+* Bugfixes
+
+  * (JRuby) Fix out of memory bug when certain invalid documents are parsed.
+  * (JRuby) Fix regression of billion-laughs vulnerability. #586
+
+
 === 1.6.0 / 2013年6月8日
 
 This release was based on v1.5.10 and 1.6.0.rc1, and contains changes
@@ -32,19 +40,27 @@ mentioned in the notes for v1.5.10.
   * Ruby 1.8.7以下のサポートを終了
 
 
+=== 1.5.11 / 2013-11-09
+
+* Bugfixes
+
+  * (JRuby) Fix out of memory bug when certain invalid documents are parsed.
+  * (JRuby) Fix regression of billion-laughs vulnerability. #568
+
+
 === 1.5.10 / 2013年6月7日
 
 * バグ修正
 
-  * (JRuby) Fix "null document" error when parsing an empty IO in jruby 1.7.3. #883
-  * (JRuby) Fix schema validation when XSD has DOCTYPE set to DTD. #861 (Thanks, Patrick Cheng!)
-  * (MRI) Fix segfault when there is no default subelement for an HTML node. #917
+  * (JRuby) JRuby 1.7.3で空のIOをパースする際の "null document" エラーを修正 #883
+  * (JRuby) XSDにDTDのDOCTYPEがあったときのスキーマ検証の問題を修正 #912 (Patrick Chengに感謝!)
+  * (MRI) HTMLノードに対するdefault_sub_element呼出でsegfaultしていたのを修正 #917
 
 
 * 註
 
-  * Use rb_ary_entry instead of RARRAY_PTR (you know, for Rubinius). #877 (Thanks, Dirkjan Bussink!)
-  * Fix TypeError when running tests. #900 (Thanks, Cédric Boutillier!)
+  * RARRAY_PTR()の代わりにrb_ary_entry()を使うように変更 (そう、Rubiniusのためにね) #877 (Dirkjan Bussinkに感謝!)
+  * テストでTypeErrorが起きるのを修正 #900 (Cédric Boutillierに感謝!)
 
 
 === 1.5.9 / 2013年3月21日
@@ -109,7 +125,7 @@ mentioned in the notes for v1.5.10.
   * SAXパーザに不正なエンコーディングに渡された場合はArgumentErrorを投げるようにした。#756 (ありがとう、Bradley Schaefer!)
   * (JRuby) XML宣言の前にスペースがあると、ドキュメントのパーズに失敗する。(#748の修正でこれもなおっている) #790
   * (JRuby) Nokogiri::XML::Node#content のJRubyの振る舞いがCRubyと同じではない。#794, #797
-  * (JRuby) で '#' で始まる文字列を名前とする EntityReference を作ろうとすると INVALID_CHARACTER_ERR という例外がはっせいする。 #719
+  * (JRuby) で '#' で始まる文字列を名前とする EntityReference を作ろうとすると INVALID_CHARACTER_ERR という例外が発生する。 #719
   * (JRuby) では Nodeのサブクラスのnamespaceを正しく文字列に変換しない。 #715
   * (JRuby) Node#contentがこのバージョンから改行コードを正しく表示するようになった。#737 (ありがとう、Piotr Szmielew!)
   * (JRuby) recover optionが指定されている場合は宣言の無い名前空間を無視するようにした。#748
@@ -142,7 +158,7 @@ mentioned in the notes for v1.5.10.
   * JRuby で US-ASCII にエンコードされた文字列が正しくないエンコードを返してくる。 #583
   * 512 文字以上が与えられたときに XmlSaxPushParser が IndexOutOfBoundsException を投げる。#567, #615
   * Xpath を評価した結果、空の NodeSet が帰ってくる場合に、NodeSet が持っている Document の decorate に失敗して例外が投げられる。#514
-  * JRuby で xpath を namespace 付きで指定した場合に、エラーが発生する。pull request #681 (ありがとう, Piotr Szmielew) 
+  * JRuby で xpath を namespace 付きで指定した場合に、エラーが発生する。pull request #681 (ありがとう, Piotr Szmielew)
   * JRuby で Nokogiri::XML::Node を継承したクラスを定義すると、namespace が表示されない。 #695
   * JRuby で RDF::RDFXML::Writer をインスタンス化しようとすると NAMESPACE_ERR (org.w3c.dom.DOMException) が発生する. #683
   * JRuby で xpath に namespaces を指定すると例外が発生する. #493
@@ -169,7 +185,7 @@ mentioned in the notes for v1.5.10.
     パース時にネットワークに接続して外部のドキュメントを見にいかせたい場合には、以下のように `nonoet` オプションを設定する:
 
     Nokogiri::XML::Document.parse(xml) { |config| config.nononet }
-    
+
     ここに、自分ならではの二重否定のジョークをうめこむとなおよし。
 
 
@@ -206,45 +222,38 @@ mentioned in the notes for v1.5.10.
 * 新機能
 
   * XML::Builder#comment はコメントノードを作れるようになった.
-  * CSS searches now support namespaced attributes. #593
-  * Java integration 機能が追加された. このバージョンから, 
+  * CSSセレクター検索が名前空間付き属性に対応 #593
+  * Java integration 機能が追加された. このバージョンから,
     XML::Document.wrap と XML::Document#to_java メソッドが利用可能。
-  * RelaxNG validator support in the `nokogiri` cli utility. #591 (thanks, Dan Radez!)
+  * `nokogiri` CLIユーティリティがRelaxNGバリデーションに対応 #591 (thanks, Dan Radez!)
 
 * バグの修正
 
-  * エンコーディング自動認識において発生しうるメモリリークを修正.
+  * エンコーディング自動認識において発生しうるメモリリークを修正
     Tim Elliottに感謝！
-  * homebrew はインストールしたら、extconf は homebrew のパスを読む。
-  * Inconsistent behavior of Nokogiri 1.5.0 Java #620
-  * Inheriting from Nokogiri::XML::Node on JRuby (1.6.4/5) fails #560
-  * XML::Attr nodes are not allowed to be added as node children, so an
-    exception is raised. #558
-  * No longer defensively "pickle" adjacent text nodes on
-    Node#add_next_sibling and Node#add_previous_sibling calls. #595.
-  * Java version inconsistency: it returns nil for empty attributes #589
-  * to_xhtml incorrectly generates <p /></p> when tag is empty #557
-  * Document#add_child now accepts a Node, NodeSet, DocumentFragment,
-    or String. #546.
-  * Document#create_element now recognizes namespaces containing
-    non-word characters (like "SOAP-ENV"). This is mostly relevant to
-    users of Builder, which calls Document#create_element for nearly
-    everything. #531.
-  * File encoding broken in 1.5.0 / jruby / windows #529
-  * Java version does not return namespace defs as attrs for ::HTML #542
-  * Bad file descriptor with Nokogiri 1.5.0 #495
-  * remove_namespace! doesn't work in pure java version #492
-  * The Nokogiri Java native build throws a null pointer exception when
-    ActiveSupport's .blank? method is called directly on a parsed object.
-    #489
-  * 1.5.0 Not using correct character encoding #488
-  * Raw XML string in XML Builder broken on JRuby #486
-  * Nokogiri 1.5.0 XML generation broken on JRuby #484
-  * Do not allow multiple root nodes. #550
-  * Fixes for custom XPath functions. #605, #606 (thanks, Juan Wajnerman!)
-  * Node#to_xml does not override :save_with if it is provided. #505
-  * Node#set is a private method (JRuby). #564 (thanks, Nick Sieger!)
-  * C14n cleanup and Node#canonicalize (thanks, Ivan Pirlik!) #563
+  * homebrew がインストールされていたら、extconf は homebrew のパスを読む。
+  * Java版の一貫性のない挙動 #620
+  * JRuby (1.6.4/5) で Nokogiri::XML::Node を継承できなかった #560
+  * XML::Attr ノードは子ノードとして追加できないので例外を出す #558
+  * Node#add_next_sibling と Node#add_previous_sibling で隣接テキストノードをdupする条件を緩和 #595
+  * Java版の一貫性のない挙動: 空の属性値をnilとして返していた #589
+  * to_xhtml が要素が空のときに <p /></p> と誤ったタグを生成していた #557
+  * Document#add_child が Node, NodeSet, DocumentFragment および
+    String を受け付けるようになった #546
+  * Document#create_element が("SOAP-ENV"のように)非単語構成文字を含む名前空間を認識するようになった. これは主に Builder を使う際に効いてくる. Builder はほぼすべてのものに Document#create_element を適用するためである #531
+  * ファイルエンコーディングが効かなかった (1.5.0 / jruby / windows) #529
+  * Java版において、<html>タグに含まれる名前空間定義を属性として返さなかった #542
+  * Nokogiri 1.5.0で Bad file descriptor が発生していた #495
+  * remove_namespace! がpure Java版で動かなかった #492
+  * Javaネイティブ版でパースされたオブジェクトに対して ActiveSupport の .blank? メソッドを呼ぶと null pointer exception が発生していた #489
+  * 1.5.0 で正しい文字エンコーディングが仕様されなかった #488
+  * XML Builder に生のXML文字列を渡した際の問題 (JRuby) #486
+  * Nokogiri 1.5.0でXML生成が壊れていた (JRuby) #484
+  * ルートノードを複数持つことを認めない #550
+  * カスタムXPath関数を修正 #606 (Juan Wajnermanに感謝!)
+  * Node#to_xml で :save_with が指定されている場合は上書きしないように修正 #505
+  * Node#set をプライベートメソッドに (JRuby) #564 (Nick Siegerに感謝!)
+  * C14nの整理と Node#canonicalize (Ivan Pirlikに感謝!) #563
 
 
 === 1.5.0 / 2011年7月1日
@@ -428,7 +437,7 @@ mentioned in the notes for v1.5.10.
 
 * ノート
 
-  * 今日４月１８日現在、Windows gems は libxml 2.7.7 とlibxslt
+  * 今日4月18日現在、Windows gems は libxml 2.7.7 とlibxslt
     1.1.26にDLLsを標準装備しています。このリリース以前にも既にDLLsはlibxml
     2.7.3 と libxslt 1.1.24に標準装備済み。
 
@@ -720,26 +729,26 @@ mentioned in the notes for v1.5.10.
 
 * バグの修正
 
-  * HTML のノードを \r のエンティティを含まない
+  * HTML のノードに \r のエンティティを含めない
   * CSS::SelectorHandler と XML::XPathHandler を除去
-  * XML::Node#attributes が Attr node を value値に返す
-  * XML::NodeSet が to_xml へ実行
+  * XML::Node#attributes が Attr node を値として返す
+  * XML::NodeSet が to_xml を実装
 
 
 === 1.1.0
 
 * 新しい機能
 
-  * カスタム XPath 機能はある。（ Nokogiri::XML::Node#xpath 参照 ）
-  * カスタム CSS 擬似クラスと機能はある。（ Nokogiri::XML::Node#css 参照 ）
+  * カスタム XPath 機能を追加。（ Nokogiri::XML::Node#xpath 参照 ）
+  * カスタム CSS 擬似クラスと機能を追加。（ Nokogiri::XML::Node#css 参照 ）
   * Nokogiri::XML::Node#<< が作成中に子ノードを自動追加
 
 * バグの修正
 
   * mutex が CSS のキャッシュのアクセスをロックする
   * GCC 3.3.5 のビルドに関する問題を修正
-  * XML::Node#to_xml が引数indentationを取る 
-  * XML::Node#dup が引数任意のdepthを取る 
+  * XML::Node#to_xml が引数indentationを取る
+  * XML::Node#dup が引数任意のdepthを取る
   * XML::Node#add_previous_sibling が新しい兄弟ノードで返す
 
 
@@ -748,10 +757,10 @@ mentioned in the notes for v1.5.10.
 * バグの修正
 
   * Dike 使用時中のメモリーリークの修正
-  * SAX パーサーが現在 IO Stream 同時解析
+  * SAX パーサーが IO Stream を逐次解析
   * コメント nodes が独自のクラスを継承する
   * Nokogiri() は Nokogiri.parse() へデリゲートする
-  * ENV['PATH'] に付加せれる代わりに先頭へデータ挿入される
+  * ENV['PATH'] に付加する代わりに先頭へ挿入する (Windows)
   * 複雑な CSS 内のバグを修正完了 :not selector ではありません
 
 
@@ -770,7 +779,7 @@ mentioned in the notes for v1.5.10.
 
 * バグフィックス
 
-  * メーリンクリストを作成
+  * メーリングリストを作成
   * バグファイルを作成
   * Windows 内で ENV['PATH'] が存在しない場合でも、存在出来るように設定完了
   * Document 内の NodeSet#[] の結果をキャッシュする
@@ -790,7 +799,7 @@ mentioned in the notes for v1.5.10.
 
 * 5つのバグ修正
 
-  * NodeSet が to_ary へ実行
+  * NodeSet が to_ary を実装
   * XML::Document#parent を除去
   * GCバグ修正済み (Mike は最高！)
   * 1.8.5互換性の為の RARRAY_LEN 除去
@@ -801,7 +810,7 @@ mentioned in the notes for v1.5.10.
 
 * 1つのバグ修正
 
-  * extconf.rb は frex や racc を調べないはず
+  * extconf.rb は frex や racc の存在をチェックすべきでない
 
 
 === 1.0.1
