@@ -1,3 +1,11 @@
+ruby-nokogiri (1.6.1+ds-3) unstable; urgency=medium
+
+  * Team upload.
+  * Bump gem2deb build dep to >= 0.7.5~
+    - Fix for #743664 
+
+ -- Pirate Praveen <praveen@debian.org>  Sat, 12 Apr 2014 19:01:32 +0530
+
 ruby-nokogiri (1.6.1+ds-2) unstable; urgency=low
 
   * Team upload.
