@@ -3,11 +3,9 @@ Author: Jérémy Bobbio <lunar@debian.org>
 Origin: vendor
 Forwarded: not-needed
 
-diff --git a/Rakefile b/Rakefile
-index 2e5564a..dddae2d 100644
 --- a/Rakefile
 +++ b/Rakefile
-@@ -40,10 +40,6 @@ HOE = Hoe.spec 'nokogiri' do
+@@ -42,10 +42,6 @@
      # GENERATED_TOKENIZER
    ]
  
@@ -18,11 +16,9 @@ index 2e5564a..dddae2d 100644
    self.extra_dev_deps += [
      ["hoe-bundler",     ">= 1.1"],
      ["hoe-debugging",   ">= 1.0.3"],
-diff --git a/ext/nokogiri/extconf.rb b/ext/nokogiri/extconf.rb
-index 47df402..91baff3 100644
 --- a/ext/nokogiri/extconf.rb
 +++ b/ext/nokogiri/extconf.rb
-@@ -45,7 +45,7 @@ if windows_p
+@@ -45,7 +45,7 @@
    XML2_HEADER_DIRS = [File.join(INCLUDEDIR, "libxml2"), INCLUDEDIR]
  
  else
@@ -31,3 +27,22 @@ index 47df402..91baff3 100644
      HEADER_DIRS = [
        # First search /opt/local for macports
        '/opt/local/include',
+--- a/metadata.yml
++++ b/metadata.yml
+@@ -15,16 +15,6 @@
+ date: 2013-12-14 00:00:00 Z
+ dependencies: 
+ - !ruby/object:Gem::Dependency 
+-  version_requirements: &id001 !ruby/object:Gem::Requirement 
+-    requirements: 
+-    - - ~>
+-      - !ruby/object:Gem::Version 
+-        version: 0.5.0
+-  type: :runtime
+-  name: mini_portile
+-  prerelease: false
+-  requirement: *id001
+-- !ruby/object:Gem::Dependency 
+   version_requirements: &id002 !ruby/object:Gem::Requirement 
+     requirements: 
+     - - ~>
