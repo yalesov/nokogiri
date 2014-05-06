@@ -1,9 +1,9 @@
-ruby-nokogiri (1.6.1+ds-4) UNRELEASED; urgency=low
+ruby-nokogiri (1.6.1+ds-4) unstable; urgency=medium
 
   * Team upload
   * Remove mini_portile from metadata.yml 
 
- -- Pirate Praveen <praveen@debian.org>  Mon, 05 May 2014 12:16:33 +0530
+ -- Pirate Praveen <praveen@debian.org>  Tue, 06 May 2014 14:11:07 +0530
 
 ruby-nokogiri (1.6.1+ds-3) unstable; urgency=medium
 
