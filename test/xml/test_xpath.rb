@@ -132,6 +132,51 @@ module Nokogiri
         assert_equal(['asdf'] * set.length, @handler.things)
       end
 
+      def parse_params node
+        params={}
+        node.xpath('./param').each do |p|
+          subparams = parse_params p
+          if(subparams.length > 0)
+            if(not params.has_key? p.attributes['name'].value)
+              params[p.attributes['name'].value] = subparams
+            else
+              if(params[p.attributes['name'].value].is_a? Array)
+                params[p.attributes['name'].value] << subparams
+              else
+                value = params[p.attributes['name'].value]
+                params[p.attributes['name'].value] = [value,subparams]
+              end
+            end
+          else
+            params[p.attributes['name'].value]=p.text
+          end
+        end
+        params
+      end
+
+      # issue #741 (xpath() around 10x slower in JRuby)
+      def test_slow_jruby_xpath
+        doc = Nokogiri::XML(File.open(XPATH_FILE))
+        start = Time.now
+
+        doc.xpath('.//category').each do |c|
+          c.xpath('programformats/programformat').each do |p|
+            p.xpath('./modules/module').each do |m|
+              parse_params m
+            end
+          end
+        end
+        stop = Time.now
+        elapsed_time = stop - start
+        time_limit =
+          if ENV['TRAVIS'] && ENV['CI']
+            20 # Travis CI box slowness
+          else
+            10
+          end
+        assert_send [elapsed_time, :<, time_limit], "XPath is taking too long"
+      end
+
       def test_custom_xpath_function_returns_string
         if Nokogiri.uses_libxml?
           result = @xml.xpath('thing("asdf")', @handler)
@@ -289,6 +334,48 @@ END
         xml_doc = Nokogiri::XML(xml_string)
         onix = xml_doc.children.first
         assert_equal 'a', onix.at_xpath('xmlns:Product').at_xpath('xmlns:RecordReference').text
+      end
+
+      def test_xpath_after_attribute_change
+        xml_string = %q{<?xml version="1.0" encoding="UTF-8"?>
+        <mods version="3.0" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-0.xsd" xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <titleInfo>
+              <nonSort>THE</nonSort>
+              <title xml:lang="eng">ARTICLE TITLE HYDRANGEA ARTICLE 1</title>
+              <subTitle>SUBTITLE</subTitle>
+          </titleInfo>
+          <titleInfo lang="finnish">
+              <title>Artikkelin otsikko Hydrangea artiklan 1</title>
+          </titleInfo>
+        </mods>}
+        
+        xml_doc = Nokogiri::XML(xml_string)
+        ns_hash = {'mods'=>'http://www.loc.gov/mods/v3'}
+        node = xml_doc.at_xpath('//mods:titleInfo[1]',ns_hash)
+        node['lang'] = 'english'
+        assert_equal 1, xml_doc.xpath('//mods:titleInfo[1]/@lang',ns_hash).length
+        assert_equal 'english', xml_doc.xpath('//mods:titleInfo[1]/@lang',ns_hash).first.value
+      end
+
+      def test_xpath_after_element_removal
+        xml_string = %q{<?xml version="1.0" encoding="UTF-8"?>
+        <mods version="3.0" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-0.xsd" xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <titleInfo>
+              <nonSort>THE</nonSort>
+              <title xml:lang="eng">ARTICLE TITLE HYDRANGEA ARTICLE 1</title>
+              <subTitle>SUBTITLE</subTitle>
+          </titleInfo>
+          <titleInfo lang="finnish">
+              <title>Artikkelin otsikko Hydrangea artiklan 1</title>
+          </titleInfo>
+        </mods>}
+        
+        xml_doc = Nokogiri::XML(xml_string)
+        ns_hash = {'mods'=>'http://www.loc.gov/mods/v3'}
+        node = xml_doc.at_xpath('//mods:titleInfo[1]',ns_hash)
+        node.remove
+        assert_equal 1, xml_doc.xpath('//mods:titleInfo',ns_hash).length
+        assert_equal 'finnish', xml_doc.xpath('//mods:titleInfo[1]/@lang',ns_hash).first.value
       end
     end
   end

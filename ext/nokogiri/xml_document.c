@@ -231,7 +231,7 @@ static VALUE read_io( VALUE klass,
 
     error = xmlGetLastError();
     if(error)
-      rb_exc_raise(Nokogiri_wrap_xml_syntax_error((VALUE)NULL, error));
+      rb_exc_raise(Nokogiri_wrap_xml_syntax_error(error));
     else
       rb_raise(rb_eRuntimeError, "Could not parse document");
 
@@ -275,7 +275,7 @@ static VALUE read_memory( VALUE klass,
 
     error = xmlGetLastError();
     if(error)
-      rb_exc_raise(Nokogiri_wrap_xml_syntax_error((VALUE)NULL, error));
+      rb_exc_raise(Nokogiri_wrap_xml_syntax_error(error));
     else
       rb_raise(rb_eRuntimeError, "Could not parse document");
 
@@ -417,7 +417,7 @@ static VALUE create_entity(int argc, VALUE *argv, VALUE self)
   if(NULL == ptr) {
     xmlErrorPtr error = xmlGetLastError();
     if(error)
-      rb_exc_raise(Nokogiri_wrap_xml_syntax_error((VALUE)NULL, error));
+      rb_exc_raise(Nokogiri_wrap_xml_syntax_error(error));
     else
       rb_raise(rb_eRuntimeError, "Could not create entity");
 
@@ -497,6 +497,7 @@ static VALUE canonicalize(int argc, VALUE* argv, VALUE self)
     ns = NULL;
   }
   else{
+    Check_Type(incl_ns, T_ARRAY);
     ns_len = RARRAY_LEN(incl_ns);
     ns = calloc((size_t)ns_len+1, sizeof(xmlChar *));
     for (i = 0 ; i < ns_len ; i++) {
@@ -510,7 +511,7 @@ static VALUE canonicalize(int argc, VALUE* argv, VALUE self)
   xmlC14NExecute(doc, cb, ctx, 
     (int)      (NIL_P(mode)        ? 0 : NUM2INT(mode)), 
     ns,
-    (int)      (NIL_P(with_comments)        ? 0 : 1),
+    (int)      RTEST(with_comments),
     buf);
 
   xmlOutputBufferClose(buf);

@@ -2,9 +2,6 @@
 # Modify the PATH on windows so that the external DLLs will get loaded.
 
 require 'rbconfig'
-ENV['PATH'] = [File.expand_path(
-  File.join(File.dirname(__FILE__), "..", "ext", "nokogiri")
-), ENV['PATH']].compact.join(';') if RbConfig::CONFIG['host_os'] =~ /(mswin|mingw)/i
 
 if defined?(RUBY_ENGINE) && RUBY_ENGINE == "jruby"
   # The line below caused a problem on non-GAE rack environment.
@@ -13,7 +10,7 @@ if defined?(RUBY_ENGINE) && RUBY_ENGINE == "jruby"
   # However, simply cutting defined?(JRuby::Rack::VERSION) off resulted in
   # an unable-to-load-nokogiri problem. Thus, now, Nokogiri checks the presense
   # of appengine-rack.jar in $LOAD_PATH. If Nokogiri is on GAE, Nokogiri
-  # should skip loading xml jars. This is because those are in WEB-INF/lib and 
+  # should skip loading xml jars. This is because those are in WEB-INF/lib and
   # already set in the classpath.
   unless $LOAD_PATH.to_s.include?("appengine-rack")
     require 'stringio'
@@ -25,7 +22,12 @@ if defined?(RUBY_ENGINE) && RUBY_ENGINE == "jruby"
   end
 end
 
-require 'nokogiri/nokogiri'
+begin
+  RUBY_VERSION =~ /(\d+.\d+)/
+  require "nokogiri/#{$1}/nokogiri"
+rescue LoadError
+  require 'nokogiri/nokogiri'
+end
 require 'nokogiri/version'
 require 'nokogiri/syntax_error'
 require 'nokogiri/xml'
@@ -36,7 +38,8 @@ require 'nokogiri/css'
 require 'nokogiri/html/builder'
 
 # Nokogiri parses and searches XML/HTML very quickly, and also has
-# correctly implemented CSS3 selector support as well as XPath support.
+# correctly implemented CSS3 selector support as well as XPath 1.0
+# support.
 #
 # Parsing a document returns either a Nokogiri::XML::Document, or a
 # Nokogiri::HTML::Document depending on the kind of document you parse.
@@ -65,20 +68,19 @@ module Nokogiri
     ###
     # Parse an HTML or XML document.  +string+ contains the document.
     def parse string, url = nil, encoding = nil, options = nil
-      doc =
-        if string.respond_to?(:read) ||
-          string =~ /^\s*<[^Hh>]*html/i # Probably html
-          Nokogiri.HTML(
-            string,
-            url,
-            encoding, options || XML::ParseOptions::DEFAULT_HTML
-          )
-        else
-          Nokogiri.XML(string, url, encoding,
-                        options || XML::ParseOptions::DEFAULT_XML)
-        end
-      yield doc if block_given?
-      doc
+      if string.respond_to?(:read) ||
+          /^\s*<(?:!DOCTYPE\s+)?html[\s>]/i === string[0, 512]
+        # Expect an HTML indicator to appear within the first 512
+        # characters of a document. (<?xml ?> + <?xml-stylesheet ?>
+        # shouldn't be that long)
+        Nokogiri.HTML(string, url, encoding,
+          options || XML::ParseOptions::DEFAULT_HTML)
+      else
+        Nokogiri.XML(string, url, encoding,
+          options || XML::ParseOptions::DEFAULT_XML)
+      end.tap { |doc|
+        yield doc if block_given?
+      }
     end
 
     ###
@@ -110,6 +112,14 @@ module Nokogiri
       Nokogiri(*args, &block).slop!
     end
   end
+
+  # Make sure to support some popular encoding aliases not known by
+  # all iconv implementations.
+  {
+    'Windows-31J' => 'CP932',	# Windows-31J is the IANA registered name of CP932.
+  }.each { |alias_name, name|
+    EncodingHandler.alias(name, alias_name) if EncodingHandler[alias_name].nil?
+  }
 end
 
 ###
@@ -120,8 +130,7 @@ end
 # To specify the type of document, use Nokogiri.XML or Nokogiri.HTML.
 def Nokogiri(*args, &block)
   if block_given?
-    builder = Nokogiri::HTML::Builder.new(&block)
-    return builder.doc.root
+    Nokogiri::HTML::Builder.new(&block).doc.root
   else
     Nokogiri.parse(*args)
   end

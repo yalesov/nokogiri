@@ -5,24 +5,59 @@ module Nokogiri
       # Get the meta tag encoding for this document.  If there is no meta tag,
       # then nil is returned.
       def meta_encoding
-        meta = meta_content_type and
-          match = /charset\s*=\s*([\w-]+)/i.match(meta['content']) and
-          match[1]
+        case
+        when meta = at('//meta[@charset]')
+          meta[:charset]
+        when meta = meta_content_type
+          meta['content'][/charset\s*=\s*([\w-]+)/i, 1]
+        end
       end
 
       ###
-      # Set the meta tag encoding for this document.  If there is no meta
-      # content tag, the encoding is not set.
+      # Set the meta tag encoding for this document.
+      #
+      # If an meta encoding tag is already present, its content is
+      # replaced with the given text.
+      #
+      # Otherwise, this method tries to create one at an appropriate
+      # place supplying head and/or html elements as necessary, which
+      # is inside a head element if any, and before any text node or
+      # content element (typically <body>) if any.
+      #
+      # The result when trying to set an encoding that is different
+      # from the document encoding is undefined.
+      #
+      # Beware in CRuby, that libxml2 automatically inserts a meta tag
+      # into a head element.
       def meta_encoding= encoding
-        meta = meta_content_type and
-          meta['content'] = "text/html; charset=%s" % encoding
+        case
+        when meta = meta_content_type
+          meta['content'] = 'text/html; charset=%s' % encoding
+          encoding
+        when meta = at('//meta[@charset]')
+          meta['charset'] = encoding
+        else
+          meta = XML::Node.new('meta', self)
+          if dtd = internal_subset and dtd.html5_dtd?
+            meta['charset'] = encoding
+          else
+            meta['http-equiv'] = 'Content-Type'
+            meta['content'] = 'text/html; charset=%s' % encoding
+          end
+
+          case
+          when head = at('//head')
+            head.prepend_child(meta)
+          else
+            set_metadata_element(meta)
+          end
+          encoding
+        end
       end
 
       def meta_content_type
-        css('meta[@http-equiv]').find { |node|
-          node['http-equiv'] =~ /\AContent-Type\z/i and
-            !node['content'].nil? and
-            !node['content'].empty?
+        xpath('//meta[@http-equiv and boolean(@content)]').find { |node|
+          node['http-equiv'] =~ /\AContent-Type\z/i
         }
       end
       private :meta_content_type
@@ -31,20 +66,64 @@ module Nokogiri
       # Get the title string of this document.  Return nil if there is
       # no title tag.
       def title
-        title = at('title') and title.inner_text
+        title = at('//title') and title.inner_text
       end
 
       ###
-      # Set the title string of this document.  If there is no head
-      # element, the title is not set.
+      # Set the title string of this document.
+      #
+      # If a title element is already present, its content is replaced
+      # with the given text.
+      #
+      # Otherwise, this method tries to create one at an appropriate
+      # place supplying head and/or html elements as necessary, which
+      # is inside a head element if any, right after a meta
+      # encoding/charset tag if any, and before any text node or
+      # content element (typically <body>) if any.
       def title=(text)
-        unless title = at('title')
-          head = at('head') or return nil
-          title = Nokogiri::XML::Node.new('title', self)
-          head << title
+        tnode = XML::Text.new(text, self)
+        if title = at('//title')
+          title.children = tnode
+          return text
         end
-        title.children = XML::Text.new(text, self)
+
+        title = XML::Node.new('title', self) << tnode
+        case
+        when head = at('//head')
+          head << title
+        when meta = at('//meta[@charset]') || meta_content_type
+          # better put after charset declaration
+          meta.add_next_sibling(title)
+        else
+          set_metadata_element(title)
+        end
+        text
       end
+
+      def set_metadata_element(element)
+        case
+        when head = at('//head')
+          head << element
+        when html = at('//html')
+          head = html.prepend_child(XML::Node.new('head', self))
+          head.prepend_child(element)
+        when first = children.find { |node|
+            case node
+            when XML::Element, XML::Text
+              true
+            end
+          }
+          # We reach here only if the underlying document model
+          # allows <html>/<head> elements to be omitted and does not
+          # automatically supply them.
+          first.add_previous_sibling(element)
+        else
+          html = add_child(XML::Node.new('html', self))
+          head = html.add_child(XML::Node.new('head', self))
+          head.prepend_child(element)
+        end
+      end
+      private :set_metadata_element
 
       ####
       # Serialize Node using +options+.  Save options can also be set using a

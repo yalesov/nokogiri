@@ -26,11 +26,14 @@ module Nokogiri
     PO_SCHEMA_FILE      = File.join(ASSETS_DIR, 'po.xsd')
     PO_XML_FILE         = File.join(ASSETS_DIR, 'po.xml')
     SHIFT_JIS_HTML      = File.join(ASSETS_DIR, 'shift_jis.html')
+    SHIFT_JIS_NO_CHARSET= File.join(ASSETS_DIR, 'shift_jis_no_charset.html')
     SHIFT_JIS_XML       = File.join(ASSETS_DIR, 'shift_jis.xml')
     SNUGGLES_FILE       = File.join(ASSETS_DIR, 'snuggles.xml')
     XML_FILE            = File.join(ASSETS_DIR, 'staff.xml')
     XML_XINCLUDE_FILE   = File.join(ASSETS_DIR, 'xinclude.xml')
+    XML_ATOM_FILE       = File.join(ASSETS_DIR, 'atom.xml')
     XSLT_FILE           = File.join(ASSETS_DIR, 'staff.xslt')
+    XPATH_FILE          = File.join(ASSETS_DIR, 'slow-xpath.xml')
 
     def teardown
       if ENV['NOKOGIRI_GC']
@@ -69,6 +72,13 @@ module Nokogiri
     alias :assert_not_nil       :refute_nil
     alias :assert_raise         :assert_raises
     alias :assert_not_equal     :refute_equal
+
+    def assert_not_send send_ary, m = nil
+      recv, msg, *args = send_ary
+      m = message(m) {
+        "Expected #{mu_pp(recv)}.#{msg}(*#{mu_pp(args)}) to return false" }
+      assert !recv.__send__(msg, *args), m
+    end unless method_defined?(:assert_not_send)
   end
 
   module SAX

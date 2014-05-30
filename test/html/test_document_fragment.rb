@@ -164,6 +164,12 @@ module Nokogiri
         assert_match %r%     \n<div>b</div> *%, fragment.to_s
       end
 
+      def test_html_fragment_with_input_and_intermediate_whitespace
+        doc = "<label>Label</label><input type=\"text\"> <span>span</span>"
+        fragment = Nokogiri::HTML::Document.new.fragment(doc)
+        assert_equal "<label>Label</label><input type=\"text\"> <span>span</span>", fragment.to_s
+      end
+
       def test_html_fragment_with_leading_text_and_newline
         fragment = HTML::Document.new.fragment("First line\nSecond line<br>Broken line")
         assert_equal fragment.to_s, "First line\nSecond line<br>Broken line"
@@ -193,14 +199,14 @@ module Nokogiri
       end
 
       def test_to_xhtml
-        doc = "<span>foo<br></span><span>bar</span>"
+        doc = "<span>foo<br></span><span>bar</span><p></p>"
         fragment = Nokogiri::HTML::Document.new.fragment(doc)
         if Nokogiri.jruby? || Nokogiri::VERSION_INFO['libxml']['loaded'] >= "2.7.0"
-          assert_equal "<span>foo<br /></span><span>bar</span>", fragment.to_xhtml
+          assert_equal "<span>foo<br /></span><span>bar</span><p></p>", fragment.to_xhtml
         else
           # FIXME: why are we doing this ? this violates the spec,
           # see http://www.w3.org/TR/xhtml1/#C_2
-          assert_equal "<span>foo<br></span><span>bar</span>", fragment.to_xhtml
+          assert_equal "<span>foo<br></span><span>bar</span><p></p>", fragment.to_xhtml
         end
       end
 

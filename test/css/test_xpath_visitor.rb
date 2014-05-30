@@ -13,8 +13,13 @@ module Nokogiri
       end
 
       def test_not_last_child
-        assert_xpath('//ol/*[not(position() = last())]',
+        assert_xpath('//ol/*[not(count(following-sibling::*) = 0)]',
           @parser.parse('ol > *:not(:last-child)'))
+      end
+
+      def test_not_only_child
+        assert_xpath('//ol/*[not(count(preceding-sibling::*) = 0 and count(following-sibling::*) = 0)]',
+          @parser.parse('ol > *:not(:only-child)'))
       end
 
       def test_function_calls_allow_at_params
