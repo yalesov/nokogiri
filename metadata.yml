@@ -1,153 +1,204 @@
---- !ruby/object:Gem::Specification 
+--- !ruby/object:Gem::Specification
 name: nokogiri
-version: !ruby/object:Gem::Version 
-  version: 1.6.1
+version: !ruby/object:Gem::Version
+  version: 1.6.2.1
 platform: ruby
-authors: 
+authors:
 - Aaron Patterson
 - Mike Dalessio
 - Yoko Harada
 - Tim Elliott
+- Akinori MUSHA
 autorequire: 
 bindir: bin
 cert_chain: []
-
-date: 2013-12-14 00:00:00 Z
-dependencies: 
-- !ruby/object:Gem::Dependency 
-  version_requirements: &id001 !ruby/object:Gem::Requirement 
-    requirements: 
-    - - ~>
-      - !ruby/object:Gem::Version 
-        version: 0.5.0
-  type: :runtime
+date: 2014-05-14 00:00:00.000000000 Z
+dependencies:
+- !ruby/object:Gem::Dependency
   name: mini_portile
+  requirement: !ruby/object:Gem::Requirement
+    requirements:
+    - - '='
+      - !ruby/object:Gem::Version
+        version: 0.6.0
+  type: :runtime
   prerelease: false
-  requirement: *id001
-- !ruby/object:Gem::Dependency 
-  version_requirements: &id002 !ruby/object:Gem::Requirement 
-    requirements: 
-    - - ~>
-      - !ruby/object:Gem::Version 
-        version: "4.0"
-  type: :development
+  version_requirements: !ruby/object:Gem::Requirement
+    requirements:
+    - - '='
+      - !ruby/object:Gem::Version
+        version: 0.6.0
+- !ruby/object:Gem::Dependency
   name: rdoc
-  prerelease: false
-  requirement: *id002
-- !ruby/object:Gem::Dependency 
-  version_requirements: &id003 !ruby/object:Gem::Requirement 
-    requirements: 
-    - - ">="
-      - !ruby/object:Gem::Version 
-        version: "1.1"
+  requirement: !ruby/object:Gem::Requirement
+    requirements:
+    - - ~>
+      - !ruby/object:Gem::Version
+        version: '4.0'
   type: :development
-  name: hoe-bundler
   prerelease: false
-  requirement: *id003
-- !ruby/object:Gem::Dependency 
-  version_requirements: &id004 !ruby/object:Gem::Requirement 
-    requirements: 
-    - - ">="
-      - !ruby/object:Gem::Version 
+  version_requirements: !ruby/object:Gem::Requirement
+    requirements:
+    - - ~>
+      - !ruby/object:Gem::Version
+        version: '4.0'
+- !ruby/object:Gem::Dependency
+  name: hoe-bundler
+  requirement: !ruby/object:Gem::Requirement
+    requirements:
+    - - '>='
+      - !ruby/object:Gem::Version
+        version: '1.1'
+  type: :development
+  prerelease: false
+  version_requirements: !ruby/object:Gem::Requirement
+    requirements:
+    - - '>='
+      - !ruby/object:Gem::Version
+        version: '1.1'
+- !ruby/object:Gem::Dependency
+  name: hoe-debugging
+  requirement: !ruby/object:Gem::Requirement
+    requirements:
+    - - '>='
+      - !ruby/object:Gem::Version
         version: 1.0.3
   type: :development
-  name: hoe-debugging
   prerelease: false
-  requirement: *id004
-- !ruby/object:Gem::Dependency 
-  version_requirements: &id005 !ruby/object:Gem::Requirement 
-    requirements: 
-    - - ">="
-      - !ruby/object:Gem::Version 
-        version: "1.0"
-  type: :development
+  version_requirements: !ruby/object:Gem::Requirement
+    requirements:
+    - - '>='
+      - !ruby/object:Gem::Version
+        version: 1.0.3
+- !ruby/object:Gem::Dependency
   name: hoe-gemspec
-  prerelease: false
-  requirement: *id005
-- !ruby/object:Gem::Dependency 
-  version_requirements: &id006 !ruby/object:Gem::Requirement 
-    requirements: 
-    - - ">="
-      - !ruby/object:Gem::Version 
-        version: "1.4"
+  requirement: !ruby/object:Gem::Requirement
+    requirements:
+    - - '>='
+      - !ruby/object:Gem::Version
+        version: '1.0'
   type: :development
-  name: hoe-git
   prerelease: false
-  requirement: *id006
-- !ruby/object:Gem::Dependency 
-  version_requirements: &id007 !ruby/object:Gem::Requirement 
-    requirements: 
+  version_requirements: !ruby/object:Gem::Requirement
+    requirements:
+    - - '>='
+      - !ruby/object:Gem::Version
+        version: '1.0'
+- !ruby/object:Gem::Dependency
+  name: hoe-git
+  requirement: !ruby/object:Gem::Requirement
+    requirements:
+    - - '>='
+      - !ruby/object:Gem::Version
+        version: '1.4'
+  type: :development
+  prerelease: false
+  version_requirements: !ruby/object:Gem::Requirement
+    requirements:
+    - - '>='
+      - !ruby/object:Gem::Version
+        version: '1.4'
+- !ruby/object:Gem::Dependency
+  name: minitest
+  requirement: !ruby/object:Gem::Requirement
+    requirements:
     - - ~>
-      - !ruby/object:Gem::Version 
+      - !ruby/object:Gem::Version
         version: 2.2.2
   type: :development
-  name: minitest
   prerelease: false
-  requirement: *id007
-- !ruby/object:Gem::Dependency 
-  version_requirements: &id008 !ruby/object:Gem::Requirement 
-    requirements: 
-    - - ">="
-      - !ruby/object:Gem::Version 
-        version: "0.9"
-  type: :development
-  name: rake
-  prerelease: false
-  requirement: *id008
-- !ruby/object:Gem::Dependency 
-  version_requirements: &id009 !ruby/object:Gem::Requirement 
-    requirements: 
+  version_requirements: !ruby/object:Gem::Requirement
+    requirements:
     - - ~>
-      - !ruby/object:Gem::Version 
-        version: 0.8.0
+      - !ruby/object:Gem::Version
+        version: 2.2.2
+- !ruby/object:Gem::Dependency
+  name: rake
+  requirement: !ruby/object:Gem::Requirement
+    requirements:
+    - - '>='
+      - !ruby/object:Gem::Version
+        version: '0.9'
   type: :development
-  name: rake-compiler
   prerelease: false
-  requirement: *id009
-- !ruby/object:Gem::Dependency 
-  version_requirements: &id010 !ruby/object:Gem::Requirement 
-    requirements: 
-    - - ">="
-      - !ruby/object:Gem::Version 
+  version_requirements: !ruby/object:Gem::Requirement
+    requirements:
+    - - '>='
+      - !ruby/object:Gem::Version
+        version: '0.9'
+- !ruby/object:Gem::Dependency
+  name: rake-compiler
+  requirement: !ruby/object:Gem::Requirement
+    requirements:
+    - - ~>
+      - !ruby/object:Gem::Version
+        version: 0.9.2
+  type: :development
+  prerelease: false
+  version_requirements: !ruby/object:Gem::Requirement
+    requirements:
+    - - ~>
+      - !ruby/object:Gem::Version
+        version: 0.9.2
+- !ruby/object:Gem::Dependency
+  name: racc
+  requirement: !ruby/object:Gem::Requirement
+    requirements:
+    - - '>='
+      - !ruby/object:Gem::Version
         version: 1.4.6
   type: :development
-  name: racc
   prerelease: false
-  requirement: *id010
-- !ruby/object:Gem::Dependency 
-  version_requirements: &id011 !ruby/object:Gem::Requirement 
-    requirements: 
-    - - ">="
-      - !ruby/object:Gem::Version 
+  version_requirements: !ruby/object:Gem::Requirement
+    requirements:
+    - - '>='
+      - !ruby/object:Gem::Version
+        version: 1.4.6
+- !ruby/object:Gem::Dependency
+  name: rexical
+  requirement: !ruby/object:Gem::Requirement
+    requirements:
+    - - '>='
+      - !ruby/object:Gem::Version
         version: 1.0.5
   type: :development
-  name: rexical
   prerelease: false
-  requirement: *id011
-- !ruby/object:Gem::Dependency 
-  version_requirements: &id012 !ruby/object:Gem::Requirement 
-    requirements: 
-    - - ~>
-      - !ruby/object:Gem::Version 
-        version: "3.7"
-  type: :development
+  version_requirements: !ruby/object:Gem::Requirement
+    requirements:
+    - - '>='
+      - !ruby/object:Gem::Version
+        version: 1.0.5
+- !ruby/object:Gem::Dependency
   name: hoe
+  requirement: !ruby/object:Gem::Requirement
+    requirements:
+    - - ~>
+      - !ruby/object:Gem::Version
+        version: '3.7'
+  type: :development
   prerelease: false
-  requirement: *id012
-description: "Nokogiri (\xE9\x8B\xB8) is an HTML, XML, SAX, and Reader parser.  Among Nokogiri's\n\
-  many features is the ability to search documents via XPath or CSS3 selectors.\n\n\
-  XML is like violence - if it doesn\xE2\x80\x99t solve your problems, you are not using\n\
-  enough of it."
-email: 
+  version_requirements: !ruby/object:Gem::Requirement
+    requirements:
+    - - ~>
+      - !ruby/object:Gem::Version
+        version: '3.7'
+description: |-
+  Nokogiri (鋸) is an HTML, XML, SAX, and Reader parser.  Among Nokogiri's
+  many features is the ability to search documents via XPath or CSS3 selectors.
+
+  XML is like violence - if it doesn’t solve your problems, you are not using
+  enough of it.
+email:
 - aaronp@rubyforge.org
 - mike.dalessio@gmail.com
 - yokolet@gmail.com
 - tle@holymonkey.com
-executables: 
+- knu@idaemons.org
+executables:
 - nokogiri
-extensions: 
+extensions:
 - ext/nokogiri/extconf.rb
-extra_rdoc_files: 
+extra_rdoc_files:
 - CHANGELOG.ja.rdoc
 - CHANGELOG.rdoc
 - C_CODING_STYLE.rdoc
@@ -157,6 +208,7 @@ extra_rdoc_files:
 - ROADMAP.md
 - STANDARD_RESPONSES.md
 - Y_U_NO_GEMSPEC.md
+- suppressions/README.txt
 - ext/nokogiri/html_document.c
 - ext/nokogiri/html_element_description.c
 - ext/nokogiri/html_entity_lookup.c
@@ -191,8 +243,9 @@ extra_rdoc_files:
 - ext/nokogiri/xml_text.c
 - ext/nokogiri/xml_xpath_context.c
 - ext/nokogiri/xslt_stylesheet.c
-files: 
+files:
 - .autotest
+- .editorconfig
 - .gemtest
 - .travis.yml
 - CHANGELOG.ja.rdoc
@@ -340,7 +393,36 @@ files:
 - lib/nokogiri/xslt.rb
 - lib/nokogiri/xslt/stylesheet.rb
 - lib/xsd/xmlparser/nokogiri.rb
-- tasks/cross_compile.rb
+- ports/archives/libxml2-2.8.0.tar.gz
+- ports/archives/libxslt-1.1.28.tar.gz
+- ports/patches/libxml2/0001-Fix-parser-local-buffers-size-problems.patch
+- ports/patches/libxml2/0002-Fix-entities-local-buffers-size-problems.patch
+- ports/patches/libxml2/0003-Fix-an-error-in-previous-commit.patch
+- ports/patches/libxml2/0004-Fix-potential-out-of-bound-access.patch
+- ports/patches/libxml2/0005-Detect-excessive-entities-expansion-upon-replacement.patch
+- ports/patches/libxml2/0006-Do-not-fetch-external-parsed-entities.patch
+- ports/patches/libxml2/0007-Enforce-XML_PARSER_EOF-state-handling-through-the-pa.patch
+- ports/patches/libxml2/0008-Improve-handling-of-xmlStopParser.patch
+- ports/patches/libxml2/0009-Fix-a-couple-of-return-without-value.patch
+- ports/patches/libxml2/0010-Keep-non-significant-blanks-node-in-HTML-parser.patch
+- ports/patches/libxml2/0011-Do-not-fetch-external-parameter-entities.patch
+- ports/patches/libxslt/0001-Adding-doc-update-related-to-1.1.28.patch
+- ports/patches/libxslt/0002-Fix-a-couple-of-places-where-f-printf-parameters-wer.patch
+- ports/patches/libxslt/0003-Initialize-pseudo-random-number-generator-with-curre.patch
+- ports/patches/libxslt/0004-EXSLT-function-str-replace-is-broken-as-is.patch
+- ports/patches/libxslt/0006-Fix-str-padding-to-work-with-UTF-8-strings.patch
+- ports/patches/libxslt/0007-Separate-function-for-predicate-matching-in-patterns.patch
+- ports/patches/libxslt/0008-Fix-direct-pattern-matching.patch
+- ports/patches/libxslt/0009-Fix-certain-patterns-with-predicates.patch
+- ports/patches/libxslt/0010-Fix-handling-of-UTF-8-strings-in-EXSLT-crypto-module.patch
+- ports/patches/libxslt/0013-Memory-leak-in-xsltCompileIdKeyPattern-error-path.patch
+- ports/patches/libxslt/0014-Fix-for-bug-436589.patch
+- ports/patches/libxslt/0015-Fix-mkdir-for-mingw.patch
+- suppressions/README.txt
+- suppressions/nokogiri_ree-1.8.7.358.supp
+- suppressions/nokogiri_ruby-1.8.7.370.supp
+- suppressions/nokogiri_ruby-1.9.2.320.supp
+- suppressions/nokogiri_ruby-1.9.3.327.supp
 - tasks/nokogiri.org.rb
 - tasks/test.rb
 - test/css/test_nthiness.rb
@@ -351,6 +433,7 @@ files:
 - test/files/2ch.html
 - test/files/address_book.rlx
 - test/files/address_book.xml
+- test/files/atom.xml
 - test/files/bar/bar.xsd
 - test/files/bogus.xml
 - test/files/dont_hurt_em_why.xml
@@ -369,6 +452,8 @@ files:
 - test/files/saml/xmldsig_schema.xsd
 - test/files/shift_jis.html
 - test/files/shift_jis.xml
+- test/files/shift_jis_no_charset.html
+- test/files/slow-xpath.xml
 - test/files/snuggles.xml
 - test/files/staff.dtd
 - test/files/staff.xml
@@ -392,9 +477,12 @@ files:
 - test/html/test_node.rb
 - test/html/test_node_encoding.rb
 - test/namespaces/test_additional_namespaces_in_builder_doc.rb
+- test/namespaces/test_namespaces_aliased_default.rb
 - test/namespaces/test_namespaces_in_builder_doc.rb
+- test/namespaces/test_namespaces_in_cloned_doc.rb
 - test/namespaces/test_namespaces_in_created_doc.rb
 - test/namespaces/test_namespaces_in_parsed_doc.rb
+- test/namespaces/test_namespaces_preservation.rb
 - test/test_convert_xpath.rb
 - test/test_css_cache.rb
 - test/test_encoding_handler.rb
@@ -443,100 +531,99 @@ files:
 - test/xslt/test_custom_functions.rb
 - test/xslt/test_exception_handling.rb
 - test_all
-- ports/archives/libxml2-2.8.0.tar.gz
-- ports/archives/libxslt-1.1.26.tar.gz
 homepage: http://nokogiri.org
-licenses: 
+licenses:
 - MIT
 metadata: {}
-
 post_install_message: 
-rdoc_options: 
+rdoc_options:
 - --main
 - README.rdoc
-require_paths: 
+require_paths:
 - lib
-required_ruby_version: !ruby/object:Gem::Requirement 
-  requirements: 
-  - - ">="
-    - !ruby/object:Gem::Version 
+required_ruby_version: !ruby/object:Gem::Requirement
+  requirements:
+  - - '>='
+    - !ruby/object:Gem::Version
       version: 1.9.2
-required_rubygems_version: !ruby/object:Gem::Requirement 
-  requirements: 
-  - - ">="
-    - !ruby/object:Gem::Version 
-      version: "0"
+required_rubygems_version: !ruby/object:Gem::Requirement
+  requirements:
+  - - '>='
+    - !ruby/object:Gem::Version
+      version: '0'
 requirements: []
-
 rubyforge_project: nokogiri
-rubygems_version: 2.0.13
+rubygems_version: 2.2.2
 signing_key: 
 specification_version: 4
-summary: "Nokogiri (\xE9\x8B\xB8) is an HTML, XML, SAX, and Reader parser"
-test_files: 
-- test/decorators/test_slop.rb
-- test/test_encoding_handler.rb
-- test/css/test_parser.rb
-- test/css/test_nthiness.rb
-- test/css/test_tokenizer.rb
-- test/css/test_xpath_visitor.rb
-- test/xslt/test_exception_handling.rb
-- test/xslt/test_custom_functions.rb
-- test/test_reader.rb
-- test/xml/test_comment.rb
-- test/xml/test_unparented_node.rb
-- test/xml/test_processing_instruction.rb
-- test/xml/test_node_attributes.rb
-- test/xml/test_xpath.rb
-- test/xml/test_node_encoding.rb
-- test/xml/test_element_decl.rb
-- test/xml/test_entity_decl.rb
-- test/xml/test_namespace.rb
-- test/xml/test_cdata.rb
-- test/xml/test_node_inheritance.rb
-- test/xml/test_entity_reference.rb
-- test/xml/test_text.rb
-- test/xml/test_reader_encoding.rb
-- test/xml/test_dtd.rb
-- test/xml/test_xinclude.rb
-- test/xml/test_parse_options.rb
-- test/xml/test_schema.rb
-- test/xml/test_element_content.rb
-- test/xml/test_document.rb
-- test/xml/test_relax_ng.rb
-- test/xml/test_c14n.rb
-- test/xml/test_dtd_encoding.rb
-- test/xml/test_syntax_error.rb
-- test/xml/test_attribute_decl.rb
-- test/xml/test_node_set.rb
-- test/xml/test_builder.rb
-- test/xml/sax/test_parser.rb
-- test/xml/sax/test_push_parser.rb
-- test/xml/sax/test_parser_context.rb
-- test/xml/test_document_encoding.rb
-- test/xml/test_attr.rb
-- test/xml/test_document_fragment.rb
-- test/xml/test_node.rb
-- test/xml/test_node_reparenting.rb
-- test/xml/node/test_save_options.rb
-- test/xml/node/test_subclass.rb
-- test/test_css_cache.rb
-- test/test_soap4r_sax.rb
-- test/html/test_node_encoding.rb
-- test/html/test_document.rb
-- test/html/test_named_characters.rb
-- test/html/test_builder.rb
-- test/html/sax/test_parser.rb
-- test/html/sax/test_parser_context.rb
-- test/html/test_document_encoding.rb
-- test/html/test_element_description.rb
-- test/html/test_document_fragment.rb
-- test/html/test_node.rb
+summary: Nokogiri (鋸) is an HTML, XML, SAX, and Reader parser
+test_files:
+- test/test_nokogiri.rb
 - test/test_memory_leak.rb
 - test/test_convert_xpath.rb
-- test/namespaces/test_namespaces_in_builder_doc.rb
+- test/xml/test_element_content.rb
+- test/xml/test_builder.rb
+- test/xml/test_element_decl.rb
+- test/xml/test_parse_options.rb
+- test/xml/test_dtd_encoding.rb
+- test/xml/test_attribute_decl.rb
+- test/xml/test_cdata.rb
+- test/xml/test_document_fragment.rb
+- test/xml/test_dtd.rb
+- test/xml/test_node_reparenting.rb
+- test/xml/test_c14n.rb
+- test/xml/test_node_inheritance.rb
+- test/xml/test_schema.rb
+- test/xml/node/test_save_options.rb
+- test/xml/node/test_subclass.rb
+- test/xml/test_processing_instruction.rb
+- test/xml/test_attr.rb
+- test/xml/test_namespace.rb
+- test/xml/test_relax_ng.rb
+- test/xml/test_xpath.rb
+- test/xml/test_reader_encoding.rb
+- test/xml/test_node_encoding.rb
+- test/xml/test_node_attributes.rb
+- test/xml/test_text.rb
+- test/xml/test_document.rb
+- test/xml/test_entity_reference.rb
+- test/xml/test_node.rb
+- test/xml/test_document_encoding.rb
+- test/xml/test_unparented_node.rb
+- test/xml/test_syntax_error.rb
+- test/xml/test_entity_decl.rb
+- test/xml/test_comment.rb
+- test/xml/sax/test_parser.rb
+- test/xml/sax/test_parser_context.rb
+- test/xml/sax/test_push_parser.rb
+- test/xml/test_node_set.rb
+- test/xml/test_xinclude.rb
+- test/test_css_cache.rb
+- test/xslt/test_exception_handling.rb
+- test/xslt/test_custom_functions.rb
+- test/decorators/test_slop.rb
+- test/html/test_builder.rb
+- test/html/test_document_fragment.rb
+- test/html/test_named_characters.rb
+- test/html/test_element_description.rb
+- test/html/test_node_encoding.rb
+- test/html/test_document.rb
+- test/html/test_node.rb
+- test/html/test_document_encoding.rb
+- test/html/sax/test_parser.rb
+- test/html/sax/test_parser_context.rb
+- test/test_xslt_transforms.rb
+- test/css/test_tokenizer.rb
+- test/css/test_parser.rb
+- test/css/test_nthiness.rb
+- test/css/test_xpath_visitor.rb
+- test/test_encoding_handler.rb
+- test/namespaces/test_namespaces_in_parsed_doc.rb
+- test/namespaces/test_namespaces_aliased_default.rb
+- test/namespaces/test_namespaces_in_cloned_doc.rb
+- test/namespaces/test_namespaces_preservation.rb
 - test/namespaces/test_namespaces_in_created_doc.rb
 - test/namespaces/test_additional_namespaces_in_builder_doc.rb
-- test/namespaces/test_namespaces_in_parsed_doc.rb
-- test/test_xslt_transforms.rb
-- test/test_nokogiri.rb
+- test/namespaces/test_namespaces_in_builder_doc.rb
+- test/test_soap4r_sax.rb
+- test/test_reader.rb

@@ -22,7 +22,7 @@ module Nokogiri
       #   end
       #
       #   parser = Nokogiri::HTML::SAX::Parser.new(MyDoc.new)
-      #   parser.parse(File.read(ARGV[0], 'rb'))
+      #   parser.parse(File.read(ARGV[0], mode: 'rb'))
       #
       # For more information on SAX parsers, see Nokogiri::XML::SAX
       class Parser < Nokogiri::XML::SAX::Parser
@@ -40,7 +40,7 @@ module Nokogiri
         # Parse a file with +filename+
         def parse_file filename, encoding = 'UTF-8'
           raise ArgumentError unless filename
-          raise Errno::ENOENT unless File.exists?(filename)
+          raise Errno::ENOENT unless File.exist?(filename)
           raise Errno::EISDIR if File.directory?(filename)
           ctx = ParserContext.file(filename, encoding)
           yield ctx if block_given?

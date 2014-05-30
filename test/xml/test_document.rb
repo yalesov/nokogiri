@@ -26,6 +26,13 @@ module Nokogiri
         assert doc.root
       end
 
+      # issue #1005
+      def test_strict_parsing_empty_doc_should_raise_exception
+        assert_raises(SyntaxError) do
+          Nokogiri::XML(StringIO.new('')) { |c| c.strict }
+        end
+      end
+
       # issue #838
       def test_document_with_invalid_prolog
         doc = Nokogiri::XML '<? ?>'
@@ -337,6 +344,59 @@ module Nokogiri
         assert_equal "quack!", doc.root.children.first.content
       end
 
+      def test_prepend
+        doc = Nokogiri::XML('<root>')
+
+        node_set = doc.root.prepend_child '<branch/>'
+        assert_equal %w[branch], node_set.map(&:name)
+
+        branch = doc.at('//branch')
+
+        leaves = %w[leaf1 leaf2 leaf3]
+        leaves.each { |name|
+          branch.prepend_child('<%s/>' % name)
+        }
+        assert_equal leaves.length, branch.children.length
+        assert_equal leaves.reverse, branch.children.map(&:name)
+      end
+
+      def test_prepend_child_fragment_with_single_node
+        doc = Nokogiri::XML::Document.new
+        fragment = doc.fragment('<hello />')
+        doc.prepend_child fragment
+        assert_equal '/hello', doc.at('//hello').path
+        assert_equal 'hello', doc.root.name
+      end
+
+      def test_prepend_child_fragment_with_multiple_nodes
+        doc = Nokogiri::XML::Document.new
+        fragment = doc.fragment('<hello /><goodbye />')
+        assert_raises(RuntimeError) do
+          doc.prepend_child fragment
+        end
+      end
+
+      def test_prepend_child_fragment_with_multiple_nodes
+        doc = Nokogiri::XML::Document.new
+        fragment = doc.fragment('<hello /><goodbye />')
+        assert_raises(RuntimeError) do
+          doc.prepend_child fragment
+        end
+      end
+
+      def test_prepend_child_with_multiple_roots
+        assert_raises(RuntimeError) do
+          @xml.prepend_child Node.new('foo', @xml)
+        end
+      end
+
+      def test_prepend_child_with_string
+        doc = Nokogiri::XML::Document.new
+        doc.prepend_child "<div>quack!</div>"
+        assert_equal 1, doc.root.children.length
+        assert_equal "quack!", doc.root.children.first.content
+      end
+
       def test_move_root_to_document_with_no_root
         sender = Nokogiri::XML('<root>foo</root>')
         newdoc = Nokogiri::XML::Document.new
@@ -481,6 +541,12 @@ module Nokogiri
         assert_raises(exception) {
           @xml.xpath('//name[foo()]')
         }
+      end
+
+      def test_xpath_syntax_error
+        assert_raises(Nokogiri::XML::XPath::SyntaxError) do
+          @xml.xpath('\\')
+        end
       end
 
       def test_ancestors

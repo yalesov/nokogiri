@@ -166,6 +166,20 @@ EOHTML
         assert_nil doc.meta_encoding
       end
 
+      def test_meta_encoding_checks_charset
+        doc = Nokogiri::HTML(<<-eohtml)
+<html>
+  <head>
+    <meta charset="UTF-8">
+  </head>
+  <body>
+    foo
+  </body>
+</html>
+        eohtml
+        assert_equal 'UTF-8', doc.meta_encoding
+      end
+
       def test_meta_encoding=
         @html.meta_encoding = 'EUC-JP'
         assert_equal 'EUC-JP', @html.meta_encoding
@@ -189,11 +203,13 @@ EOHTML
 </html>
 eohtml
         doc.title = 'new'
+        assert_equal 1, doc.css('title').size
         assert_equal 'new', doc.title
 
         doc = Nokogiri::HTML(<<eohtml)
 <html>
   <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   </head>
   <body>
     foo
@@ -202,6 +218,10 @@ eohtml
 eohtml
         doc.title = 'new'
         assert_equal 'new', doc.title
+        title = doc.at('/html/head/title')
+        assert_not_nil title
+        assert_equal 'new', title.text
+        assert_equal -1, doc.at('meta[@http-equiv]') <=> title
 
         doc = Nokogiri::HTML(<<eohtml)
 <html>
@@ -211,19 +231,66 @@ eohtml
 </html>
 eohtml
         doc.title = 'new'
-        if Nokogiri.uses_libxml?
-          assert_nil doc.title
-        else
-          assert_equal 'new', doc.title
-        end
+        assert_equal 'new', doc.title
+        # <head> may or may not be added
+        title = doc.at('/html//title')
+        assert_not_nil title
+        assert_equal 'new', title.text
+        assert_equal -1, title <=> doc.at('body')
+
+        doc = Nokogiri::HTML(<<eohtml)
+<html>
+  <meta charset="UTF-8">
+  <body>
+    foo
+  </body>
+</html>
+eohtml
+        doc.title = 'new'
+        assert_equal 'new', doc.title
+        assert_equal -1, doc.at('meta[@charset]') <=> doc.at('title')
+        assert_equal -1, doc.at('title') <=> doc.at('body')
+
+        doc = Nokogiri::HTML('<!DOCTYPE html><p>hello')
+        doc.title = 'new'
+        assert_equal 'new', doc.title
+        assert_instance_of Nokogiri::XML::DTD, doc.children.first
+        assert_equal -1, doc.at('title') <=> doc.at('p')
+
+        doc = Nokogiri::HTML('')
+        doc.title = 'new'
+        assert_equal 'new', doc.title
+        assert_equal 'new', doc.at('/html/head/title/text()').to_s
       end
 
       def test_meta_encoding_without_head
-        html = Nokogiri::HTML('<html><body>foo</body></html>')
+        encoding = 'EUC-JP'
+        html = Nokogiri::HTML('<html><body>foo</body></html>', nil, encoding)
+
         assert_nil html.meta_encoding
 
-        html.meta_encoding = 'EUC-JP'
+        html.meta_encoding = encoding
+        assert_equal encoding, html.meta_encoding
+
+        meta = html.at('/html/head/meta[@http-equiv and boolean(@content)]')
+        assert meta, 'meta is in head'
+
+        assert meta.at('./parent::head/following-sibling::body'), 'meta is before body'
+      end
+
+      def test_html5_meta_encoding_without_head
+        encoding = 'EUC-JP'
+        html = Nokogiri::HTML('<!DOCTYPE html><html><body>foo</body></html>', nil, encoding)
+
         assert_nil html.meta_encoding
+
+        html.meta_encoding = encoding
+        assert_equal encoding, html.meta_encoding
+
+        meta = html.at('/html/head/meta[@charset]')
+        assert meta, 'meta is in head'
+
+        assert meta.at('./parent::head/following-sibling::body'), 'meta is before body'
       end
 
       def test_meta_encoding_with_empty_content_type
