@@ -3,7 +3,7 @@ Description: disable test_reader_entity_reference_without_dtdload
 Origin: vendor
 Author: Cédric Boutillier <boutil@debian.org>
 Forwarded: no
-Last-Update: 2013-08-16
+Last-Update: 2014-05-30
 
 --- a/test/xml/test_entity_reference.rb
 +++ b/test/xml/test_entity_reference.rb
@@ -13,22 +13,22 @@ Last-Update: 2013-08-16
  
 -      test_relative_and_absolute_path :test_reader_entity_reference_without_dtdload do
 -        html = File.read xml_document
+-        reader = Nokogiri::XML::Reader html, path do |cfg|
+-          cfg.default_xml
+-        end
 -        assert_raises(Nokogiri::XML::SyntaxError) do
--          reader = Nokogiri::XML::Reader html, path do |cfg|
--            cfg.default_xml
--          end
 -          reader.each { |n| n }
 -        end
 -      end
-+    # test_relative_and_absolute_path :test_reader_entity_reference_without_dtdload do
-+    #   html = File.read xml_document
-+    #   assert_raises(Nokogiri::XML::SyntaxError) do
-+    #     reader = Nokogiri::XML::Reader html, path do |cfg|
-+    #       cfg.default_xml
-+    #     end
-+    #     reader.each { |n| n }
-+    #   end
-+    # end
++      #test_relative_and_absolute_path :test_reader_entity_reference_without_dtdload do
++      #  html = File.read xml_document
++      #  reader = Nokogiri::XML::Reader html, path do |cfg|
++      #    cfg.default_xml
++      #  end
++      #  assert_raises(Nokogiri::XML::SyntaxError) do
++      #    reader.each { |n| n }
++      #  end
++      #end
      end
    end
  end
