@@ -262,6 +262,11 @@ module Nokogiri
         assert frag.errors.any?{|err| err.to_s =~ /Tag hello invalid/}, "errors should be on the context node's document"
         assert frag.errors.none?{|err| err.to_s =~ /jimmy/}, "errors should not include pre-existing document errors"
       end
+
+      def test_issue_444_trim_when_no_schem_given
+        fragment = Nokogiri::HTML::DocumentFragment.parse("<p>hi</p>\n").to_html
+        assert_equal "<p>hi</p>", fragment
+      end
     end
   end
 end

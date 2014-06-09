@@ -112,6 +112,7 @@ public class XmlDocumentFragment extends XmlNode {
         // checks whether schema is given. if exists, allows whitespace processing to a parser
         Document document = (Document)xmlDocument.node;
         if (document.getDoctype() != null) return str;
+        if (str.isFrozen()) return str;
         // strips trailing \n off forcefully
         // not to return new object in case of no chomp needed, chomp! is used here.
         IRubyObject result;
