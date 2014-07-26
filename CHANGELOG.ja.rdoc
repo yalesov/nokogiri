@@ -1,3 +1,26 @@
+=== 1.6.3.1 / 2014年7月21日
+
+==== バグ修正
+
+* Addressing an Apple Macintosh installation problem for GCC users. #1130 (Thanks, @zenspider!)
+
+
+=== 1.6.3 / 2014年7月20日
+
+==== 機能
+
+* Added Node#document? and Node#processing_instruction?
+
+
+==== バグ修正
+
+* [JRuby] Fix Ruby memory exhaustion vulnerability. #1087 (Thanks, @ocher)
+* [MRI] Fix segfault during GC when using `libxml-ruby` and `nokogiri` together in multi-threaded environment. #895 (Thanks, @ender672!)
+* Building on OSX 10.9 stock ruby 2.0.0 now works. #1101 (Thanks, @zenspider!)
+* Node#parse now works again for HTML document nodes (broken in 1.6.2+).
+* Processing instructions can now be added via Node#add_next_sibling.
+
+
 === 1.6.2.1 / 2014年5月13日
 
 ==== バグ修正
