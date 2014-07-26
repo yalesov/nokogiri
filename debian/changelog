@@ -1,3 +1,10 @@
+ruby-nokogiri (1.6.3.1+ds-1) unstable; urgency=medium
+
+  * Imported Upstream version 1.6.3.1+ds
+  * Refresh always_use_system_libraries.patch
+
+ -- Cédric Boutillier <boutil@debian.org>  Sat, 26 Jul 2014 06:12:09 +0200
+
 ruby-nokogiri (1.6.2.1+ds-1) unstable; urgency=medium
 
   * Imported Upstream version 1.6.2.1+ds
