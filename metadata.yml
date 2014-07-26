@@ -1,7 +1,7 @@
 --- !ruby/object:Gem::Specification
 name: nokogiri
 version: !ruby/object:Gem::Version
-  version: 1.6.2.1
+  version: 1.6.3.1
 platform: ruby
 authors:
 - Aaron Patterson
@@ -12,7 +12,7 @@ authors:
 autorequire: 
 bindir: bin
 cert_chain: []
-date: 2014-05-14 00:00:00.000000000 Z
+date: 2014-07-22 00:00:00.000000000 Z
 dependencies:
 - !ruby/object:Gem::Dependency
   name: mini_portile

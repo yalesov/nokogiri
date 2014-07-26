@@ -91,7 +91,6 @@ rm -rf gems
 mkdir -p gems
 
 # windows
-
 for verspec in `cross_rubies`; do
     version="${verspec%%:*}"
     ver="${version%%-*}"
@@ -116,7 +115,7 @@ cp -v pkg/nokogiri*{x86,x64}-mingw32*.gem gems
 # MRI
 bundle exec rake clean
 bundle exec rake gem
-cp -v pkg/nokogiri*.gem gems # should only be one at this point in the script
+cp -v pkg/nokogiri*.gem gems
 
 # jruby
 rvm_use jruby

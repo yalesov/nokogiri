@@ -311,6 +311,10 @@ when 'mingw32', /mswin/
   $CFLAGS << " -DXP_WIN -DXP_WIN32 -DUSE_INCLUDED_VASPRINTF"
 when /solaris/
   $CFLAGS << " -DUSE_INCLUDED_VASPRINTF"
+when /darwin/
+  if RbConfig::MAKEFILE_CONFIG['CC'] !~ /gcc/ then
+    $CFLAGS << " -Wno-error=unused-command-line-argument-hard-error-in-future"
+  end
 else
   $CFLAGS << " -g -DXP_UNIX"
 end
@@ -469,6 +473,7 @@ else
         }
       }
 
+      # Defining a macro that expands to a C string; double quotes are significant.
       $CPPFLAGS << ' ' << "-DNOKOGIRI_#{recipe.name.upcase}_PATH=\"#{recipe.path}\"".shellescape
 
       case libname
