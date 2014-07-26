@@ -2,7 +2,7 @@ Description: always use system libraries and remov the dependency to mini_portil
 Author: Jérémy Bobbio <lunar@debian.org>
 Origin: vendor
 Forwarded: not-needed
-Last-Update: 2014-05-30
+Last-Update: 2014-07-25
 
 --- a/Rakefile
 +++ b/Rakefile
@@ -25,7 +25,7 @@ Last-Update: 2014-05-30
      ["hoe-debugging",   ">= 1.0.3"],
 --- a/ext/nokogiri/extconf.rb
 +++ b/ext/nokogiri/extconf.rb
-@@ -327,7 +327,7 @@
+@@ -331,7 +331,7 @@
  end
  
  case
@@ -37,7 +37,7 @@ Last-Update: 2014-05-30
 --- a/metadata.yml
 +++ b/metadata.yml
 @@ -15,20 +15,6 @@
- date: 2014-05-14 00:00:00.000000000 Z
+ date: 2014-07-22 00:00:00.000000000 Z
  dependencies:
  - !ruby/object:Gem::Dependency
 -  name: mini_portile
