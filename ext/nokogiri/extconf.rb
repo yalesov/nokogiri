@@ -218,7 +218,7 @@ def process_recipe(name, version, static_p, cross_p)
     end
 
     recipe.configure_options += env.map { |key, value|
-      "#{key}=#{value}".shellescape
+      "#{key}=#{value}"
     }
 
     message <<-"EOS"
@@ -286,19 +286,6 @@ end
 # Workaround for Ruby bug #8074, introduced in Ruby 2.0.0, fixed in Ruby 2.1.0
 # https://bugs.ruby-lang.org/issues/8074
 @libdir_basename = "lib" if RUBY_VERSION < '2.1.0'
-
-# Workaround for #1102
-def monkey_patch_mini_portile
-  MiniPortile.class_eval do
-    def patch
-      @patch_files.each do |full_path|
-        next unless File.exists?(full_path)
-        output "Running patch with #{full_path}..."
-        execute('patch', %Q(patch -p1 < #{full_path}))
-      end
-    end
-  end
-end
 
 #
 # main
@@ -378,8 +365,8 @@ when arg_config('--use-system-libraries', !!ENV['NOKOGIRI_USE_SYSTEM_LIBRARIES']
 else
   message "Building nokogiri using packaged libraries.\n"
 
+  $LOAD_PATH.unshift File.dirname(__FILE__)
   require 'mini_portile'
-  monkey_patch_mini_portile
   require 'yaml'
 
   static_p = enable_config('static', true) or
