@@ -83,6 +83,42 @@ The IRC channel is #nokogiri on freenode.
   * libxslt, built with and supported by the given libxml2
     (libxslt-dev/-devel is required too)
 
+
+== REPORTING VULNERABILITIES:
+
+*** This section is a DRAFT intended to solicit comments ***
+
+*** See https://github.com/sparklemotion/nokogiri/issues/1191 ***
+
+The Nokogiri Core Contributors take security very seriously, and
+investigate all reported vulnerabilities.
+
+If you would like to report a vulnerablity or have a security concern
+regarding Nokogiri or how Nokogiri is using any of its underlying
+platform-specific libraries (such as libxml2 or xerces), please email
+nokogiri-core@googlegroups.com.
+
+Your email will be acknowledged within 24 hours, and you'll receive a
+more detailed response to your email withing 72 hours indicating next
+steps in handling your report.
+
+If you have not received a reply to your email within 48 hours, there
+are a few steps you can take:
+
+1. Contact the current security coordinator (TODO)
+2. Contact the back-up contact (TODO)
+3. Email the nokogiri-talk list
+
+Please note, the nokogiri-talk list is a public area. When escalating
+to that address please do not discuss your issue, simply say that
+you’re trying to get a hold of someone from the core team.
+
+The information you share with the Nokogiri Core Contributors as part
+of this process will be kept confidential within the team, unless or
+until we need to share information upstream with our dependent
+libraries' core teams, at which point we will notify you.
+
+
 == ENCODING:
 
 Strings are always stored as UTF-8 internally.  Methods that return
