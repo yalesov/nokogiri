@@ -820,6 +820,24 @@ module Nokogiri
         assert dup.xml?, 'duplicate should be xml'
       end
 
+      def test_dup_xml_document_errors
+        html = "<html><body><div>error!</body></html>"
+
+        doc = Nokogiri::XML::Document.parse(html)
+        doc2 = doc.dup
+
+        child  = doc.css('body').children[0]
+        child2 = doc2.css('body').children[0]
+
+        assert_equal doc,        child.document
+        assert_equal doc.errors, child.document.errors
+        assert       doc.errors.length > 0
+
+        assert_equal doc2,        child2.document
+        assert_equal doc2.errors, child2.document.errors
+        assert       doc2.errors.length > 0
+      end
+
       def test_new
         doc = nil
         doc = Nokogiri::XML::Document.new
