@@ -320,9 +320,7 @@ static VALUE read_memory( VALUE klass,
 static VALUE duplicate_document(int argc, VALUE *argv, VALUE self)
 {
   xmlDocPtr doc, dup;
-  VALUE copy;
-  VALUE level;
-  VALUE error_list      = rb_ary_new();
+  VALUE copy, level;
 
   if(rb_scan_args(argc, argv, "01", &level) == 0)
     level = INT2NUM((long)1);
@@ -330,7 +328,7 @@ static VALUE duplicate_document(int argc, VALUE *argv, VALUE self)
   Data_Get_Struct(self, xmlDoc, doc);
 
   xmlResetLastError();
-  xmlSetStructuredErrorFunc((void *)error_list, Nokogiri_error_array_pusher);
+  xmlSetStructuredErrorFunc(NULL, Nokogiri_error_silencer);
   dup = xmlCopyDoc(doc, (int)NUM2INT(level));
   xmlSetStructuredErrorFunc(NULL, NULL);
 
@@ -338,7 +336,7 @@ static VALUE duplicate_document(int argc, VALUE *argv, VALUE self)
 
   dup->type = doc->type;
   copy = Nokogiri_wrap_xml_document(rb_obj_class(self), dup);
-  rb_iv_set(copy, "@errors", error_list);
+  rb_iv_set(copy, "@errors", rb_iv_get(self, "@errors"));
   return copy ;
 }
 
