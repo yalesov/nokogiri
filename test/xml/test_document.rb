@@ -833,6 +833,10 @@ module Nokogiri
         assert_equal doc.errors, child.document.errors
         assert       doc.errors.length > 0
 
+        STDERR.puts "child doc:"
+        STDERR.puts child2.document
+        STDERR.puts "end"
+
         assert_equal doc2,        child2.document
         assert_equal doc2.errors, child2.document.errors
         assert       doc2.errors.length > 0

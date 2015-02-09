@@ -894,10 +894,17 @@ public class XmlNode extends RubyObject {
 
     @JRubyMethod
     public IRubyObject document(ThreadContext context) {
+        System.err.println("MIKE: document for "
+                           + node + " (" + System.identityHashCode(node) + ")"
+                           + " is "
+                           + node.getOwnerDocument() + " (" + System.identityHashCode(node.getOwnerDocument()) + ")"
+            );
         if (doc == null) {
+            System.err.println("MIKE: doc is null 898");
             doc = (XmlDocument) node.getOwnerDocument().getUserData(NokogiriHelpers.CACHED_NODE);
         }
         if (doc == null) {
+            System.err.println("MIKE: doc is null 902");
             doc = getCachedNodeOrCreate(context.getRuntime(), node.getOwnerDocument());
             node.getOwnerDocument().setUserData(NokogiriHelpers.CACHED_NODE, doc, null);
         }
