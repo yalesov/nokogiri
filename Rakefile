@@ -101,8 +101,6 @@ CROSS_RUBIES = File.read('.cross_rubies').lines.flat_map { |line|
 
 ENV['RUBY_CC_VERSION'] ||= CROSS_RUBIES.map(&:ver).uniq.join(":")
 
-require 'tasks/nokogiri.org'
-
 HOE = Hoe.spec 'nokogiri' do
   developer 'Aaron Patterson', 'aaronp@rubyforge.org'
   developer 'Mike Dalessio',   'mike.dalessio@gmail.com'
@@ -136,13 +134,13 @@ HOE = Hoe.spec 'nokogiri' do
       # for more details, see:
       # - https://github.com/sparklemotion/nokogiri/issues/1102
       # - https://github.com/luislavena/mini_portile/issues/32
-      ["mini_portile",    "= 0.6.0"],
+      ["mini_portile",    "~> 0.6.0"],
     ]
   end
 
   self.extra_dev_deps += [
     ["hoe-bundler",     ">= 1.1"],
-    ["hoe-debugging",   ">= 1.0.3"],
+    ["hoe-debugging",   "~> 1.2.0"],
     ["hoe-gemspec",     ">= 1.0"],
     ["hoe-git",         ">= 1.4"],
     ["minitest",        "~> 2.2.2"],

@@ -1,4 +1,5 @@
 .autotest
+.cross_rubies
 .editorconfig
 .gemtest
 .travis.yml
@@ -21,6 +22,7 @@ ext/java/nokogiri/HtmlDocument.java
 ext/java/nokogiri/HtmlElementDescription.java
 ext/java/nokogiri/HtmlEntityLookup.java
 ext/java/nokogiri/HtmlSaxParserContext.java
+ext/java/nokogiri/HtmlSaxPushParser.java
 ext/java/nokogiri/NokogiriService.java
 ext/java/nokogiri/XmlAttr.java
 ext/java/nokogiri/XmlAttributeDecl.java
@@ -230,6 +232,7 @@ lib/nokogiri/xml/sax/parser.rb
 lib/nokogiri/xml/sax/parser_context.rb
 lib/nokogiri/xml/sax/push_parser.rb
 lib/nokogiri/xml/schema.rb
+lib/nokogiri/xml/searchable.rb
 lib/nokogiri/xml/syntax_error.rb
 lib/nokogiri/xml/text.rb
 lib/nokogiri/xml/xpath.rb
@@ -239,17 +242,8 @@ lib/nokogiri/xslt.rb
 lib/nokogiri/xslt/stylesheet.rb
 lib/xercesImpl.jar
 lib/xsd/xmlparser/nokogiri.rb
-ports/patches/libxml2/0001-Fix-parser-local-buffers-size-problems.patch
-ports/patches/libxml2/0002-Fix-entities-local-buffers-size-problems.patch
-ports/patches/libxml2/0003-Fix-an-error-in-previous-commit.patch
-ports/patches/libxml2/0004-Fix-potential-out-of-bound-access.patch
-ports/patches/libxml2/0005-Detect-excessive-entities-expansion-upon-replacement.patch
-ports/patches/libxml2/0006-Do-not-fetch-external-parsed-entities.patch
-ports/patches/libxml2/0007-Enforce-XML_PARSER_EOF-state-handling-through-the-pa.patch
-ports/patches/libxml2/0008-Improve-handling-of-xmlStopParser.patch
-ports/patches/libxml2/0009-Fix-a-couple-of-return-without-value.patch
-ports/patches/libxml2/0010-Keep-non-significant-blanks-node-in-HTML-parser.patch
-ports/patches/libxml2/0011-Do-not-fetch-external-parameter-entities.patch
+ports/patches/libxml2/0001-Revert-Missing-initialization-for-the-catalog-module.patch
+ports/patches/libxml2/0002-Fix-missing-entities-after-CVE-2014-3660-fix.patch
 ports/patches/libxslt/0001-Adding-doc-update-related-to-1.1.28.patch
 ports/patches/libxslt/0002-Fix-a-couple-of-places-where-f-printf-parameters-wer.patch
 ports/patches/libxslt/0003-Initialize-pseudo-random-number-generator-with-curre.patch
@@ -262,12 +256,12 @@ ports/patches/libxslt/0010-Fix-handling-of-UTF-8-strings-in-EXSLT-crypto-module.
 ports/patches/libxslt/0013-Memory-leak-in-xsltCompileIdKeyPattern-error-path.patch
 ports/patches/libxslt/0014-Fix-for-bug-436589.patch
 ports/patches/libxslt/0015-Fix-mkdir-for-mingw.patch
+ports/patches/sort-patches-by-date
 suppressions/README.txt
 suppressions/nokogiri_ree-1.8.7.358.supp
 suppressions/nokogiri_ruby-1.8.7.370.supp
 suppressions/nokogiri_ruby-1.9.2.320.supp
 suppressions/nokogiri_ruby-1.9.3.327.supp
-tasks/nokogiri.org.rb
 tasks/test.rb
 test/css/test_nthiness.rb
 test/css/test_parser.rb
@@ -312,6 +306,7 @@ test/files/xinclude.xml
 test/helper.rb
 test/html/sax/test_parser.rb
 test/html/sax/test_parser_context.rb
+test/html/sax/test_push_parser.rb
 test/html/test_builder.rb
 test/html/test_document.rb
 test/html/test_document_encoding.rb

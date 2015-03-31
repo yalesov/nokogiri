@@ -13,12 +13,6 @@ module Nokogiri
       # functions to be in a namespace. This is not required by XPath, afaik,
       # but it is an usual convention though.
       #
-      # Furthermore, CSS does not support extension functions but it does in
-      # Nokogiri. Result: you cannot use them in JRuby impl. At least, until
-      # the CSS to XPath parser is patched, and let me say that there are more
-      # important features to add before that happens. I hope you will forgive
-      # me.
-      #
       # Yours truly,
       #
       # The guy whose headaches belong to Nokogiri JRuby impl.
@@ -69,6 +63,10 @@ module Nokogiri
         assert_equal 4, @xml.xpath('//address[@domestic=$value]', nil, :value => 'Yes').length
       end
 
+      def test_variable_binding_with_search
+        assert_equal 4, @xml.search('//address[@domestic=$value]', nil, :value => 'Yes').length
+      end
+
       def test_unknown_attribute
         assert_equal 0, @xml.xpath('//employee[@id="asdfasdf"]/@fooo').length
         assert_nil @xml.xpath('//employee[@id="asdfasdf"]/@fooo')[0]
@@ -86,12 +84,28 @@ module Nokogiri
         assert_equal 'foo', @xml.xpath('concat("fo", "o")')
       end
 
+      def test_node_search_with_multiple_queries
+        xml = '<document>
+                 <thing>
+                   <div class="title">important thing</div>
+                 </thing>
+                 <thing>
+                   <div class="content">stuff</div>
+                 </thing>
+                 <thing>
+                   <p class="blah">more stuff</div>
+                 </thing>
+               </document>'
+        node = Nokogiri::XML(xml).root
+        assert_kind_of Nokogiri::XML::Node, node
+
+        assert_equal 3, node.xpath('.//div', './/p').length
+        assert_equal 3, node.css('.title', '.content', 'p').length
+        assert_equal 3, node.search('.//div', 'p.blah').length
+      end
+
       def test_css_search_uses_custom_selectors_with_arguments
-        set = if Nokogiri.uses_libxml?
-                @xml.css('employee > address:my_filter("domestic", "Yes")', @handler)
-              else
-                @xml.xpath("//employee/address[nokogiri:my_filter(., \"domestic\", \"Yes\")]", @ns, @handler)
-               end
+        set = @xml.css('employee > address:my_filter("domestic", "Yes")', @handler)
         assert set.length > 0
         set.each do |node|
           assert_equal 'Yes', node['domestic']
@@ -100,13 +114,29 @@ module Nokogiri
 
       def test_css_search_uses_custom_selectors
         set = @xml.xpath('//employee')
-        if Nokogiri.uses_libxml?
-          @xml.css('employee:thing()', @handler)
-        else
-          @xml.xpath("//employee[nokogiri:thing(.)]", @ns, @handler)
-        end
+        @xml.css('employee:thing()', @handler)
         assert_equal(set.length, @handler.things.length)
         assert_equal(set.to_a, @handler.things.flatten)
+      end
+
+      def test_search_with_css_query_uses_custom_selectors_with_arguments
+        set = @xml.search('employee > address:my_filter("domestic", "Yes")', @handler)
+        assert set.length > 0
+        set.each do |node|
+          assert_equal 'Yes', node['domestic']
+        end
+      end
+
+      def test_search_with_xpath_query_uses_custom_selectors_with_arguments
+        set = if Nokogiri.uses_libxml?
+                @xml.search('//employee/address[my_filter(., "domestic", "Yes")]', @handler)
+              else
+                @xml.search('//employee/address[nokogiri:my_filter(., "domestic", "Yes")]', @ns, @handler)
+              end
+        assert set.length > 0
+        set.each do |node|
+          assert_equal 'Yes', node['domestic']
+        end
       end
 
       def test_pass_self_to_function
@@ -156,6 +186,8 @@ module Nokogiri
 
       # issue #741 (xpath() around 10x slower in JRuby)
       def test_slow_jruby_xpath
+        skip("MRI will exceed this timeout when running under valgrind") unless Nokogiri.jruby?
+
         doc = Nokogiri::XML(File.open(XPATH_FILE))
         start = Time.now
 
@@ -175,6 +207,22 @@ module Nokogiri
             10
           end
         assert_send [elapsed_time, :<, time_limit], "XPath is taking too long"
+      end
+
+      # issue #1109 (jruby impl's xpath() cache not being cleared on attr removal)
+      def test_xpath_results_cache_should_get_cleared_on_attr_removal
+        doc = Nokogiri::HTML('<html><div name="foo"></div></html>')
+        element = doc.at_xpath('//div[@name="foo"]')
+        element.remove_attribute('name')
+        assert_nil doc.at_xpath('//div[@name="foo"]')
+      end
+
+      # issue #1109 (jruby impl's xpath() cache not being cleared on attr update )
+      def test_xpath_results_cache_should_get_cleared_on_attr_update
+        doc = Nokogiri::HTML('<html><div name="foo"></div></html>')
+        element = doc.at_xpath('//div[@name="foo"]')
+        element['name'] = 'bar'
+        assert_nil doc.at_xpath('//div[@name="foo"]')
       end
 
       def test_custom_xpath_function_returns_string
@@ -330,7 +378,7 @@ END
             <RecordReference>a</RecordReference>
           </Product>
         </ONIXMessage>}
-        
+
         xml_doc = Nokogiri::XML(xml_string)
         onix = xml_doc.children.first
         assert_equal 'a', onix.at_xpath('xmlns:Product').at_xpath('xmlns:RecordReference').text
@@ -348,7 +396,7 @@ END
               <title>Artikkelin otsikko Hydrangea artiklan 1</title>
           </titleInfo>
         </mods>}
-        
+
         xml_doc = Nokogiri::XML(xml_string)
         ns_hash = {'mods'=>'http://www.loc.gov/mods/v3'}
         node = xml_doc.at_xpath('//mods:titleInfo[1]',ns_hash)
@@ -369,7 +417,7 @@ END
               <title>Artikkelin otsikko Hydrangea artiklan 1</title>
           </titleInfo>
         </mods>}
-        
+
         xml_doc = Nokogiri::XML(xml_string)
         ns_hash = {'mods'=>'http://www.loc.gov/mods/v3'}
         node = xml_doc.at_xpath('//mods:titleInfo[1]',ns_hash)

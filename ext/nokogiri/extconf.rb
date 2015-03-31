@@ -40,16 +40,6 @@ HELP
   exit! 0
 end
 
-def message!(important_message)
-  message important_message
-  if !$stdout.tty? && File.chardev?('/dev/tty')
-    File.open('/dev/tty', 'w') { |tty|
-      tty.print important_message
-    }
-  end
-rescue Errno::ENXIO
-end
-
 def do_clean
   require 'pathname'
   require 'fileutils'
@@ -81,6 +71,29 @@ def do_clean
   exit! 0
 end
 
+def nokogiri_try_compile
+  args = if defined?(RUBY_VERSION) && RUBY_VERSION <= "1.9.2"
+           ["int main() {return 0;}"]
+         else
+           ["int main() {return 0;}", "", {werror: true}]
+         end
+  try_compile(*args)
+end
+
+
+def add_cflags(flags)
+  print "checking if the C compiler accepts #{flags}... "
+  with_cflags("#{$CFLAGS} #{flags}") do
+    if nokogiri_try_compile
+      puts 'yes'
+      true
+    else
+      puts 'no'
+      false
+    end
+  end
+end
+
 def preserving_globals
   values = [
     $arg_config,
@@ -96,58 +109,68 @@ ensure
 end
 
 def asplode(lib)
-  abort "-----\n#{lib} is missing.  please visit http://nokogiri.org/tutorials/installing_nokogiri.html for help with installing dependencies.\n-----"
+  abort "-----\n#{lib} is missing.  Please locate mkmf.log to investigate how it is failing.\n-----"
 end
 
-def have_iconv?
-  have_header('iconv.h') or return false
-  %w{ iconv_open libiconv_open }.any? do |method|
-    have_func(method, 'iconv.h') or
-      have_library('iconv', method, 'iconv.h')
-  end
+def have_iconv?(using = nil)
+  checking_for(using ? "iconv using #{using}" : 'iconv') {
+    ['', '-liconv'].any? { |opt|
+      preserving_globals {
+        yield if block_given?
+
+        try_link(<<-'SRC', opt)
+#include <stdlib.h>
+#include <iconv.h>
+
+int main(void)
+{
+    iconv_t cd = iconv_open("", "");
+    iconv(cd, NULL, NULL, NULL, NULL);
+    return EXIT_SUCCESS;
+}
+        SRC
+      }
+    }
+  }
 end
 
-def each_iconv_idir
+def iconv_configure_flags
   # If --with-iconv-dir or --with-opt-dir is given, it should be
   # the first priority
-  %w[iconv opt].each { |config|
-    idir = preserving_globals {
-      dir_config(config)
-    }.first and yield idir
+  %w[iconv opt].each { |name|
+    if (config = preserving_globals { dir_config(name) }).any? &&
+       have_iconv?("--with-#{name}-* flags") { dir_config(name) }
+      idirs, ldirs = config.map { |dirs|
+        Array(dirs).flat_map { |dir|
+          dir.split(File::PATH_SEPARATOR)
+        } if dirs
+      }
+
+      return [
+        '--with-iconv=yes',
+        *("CPPFLAGS=#{idirs.map { |dir| '-I' << dir }.join(' ')}".quote if idirs),
+        *("LDFLAGS=#{ldirs.map { |dir| '-L' << dir }.join(' ')}".quote if ldirs),
+      ]
+    end
   }
 
-  # Try the system default
-  yield "/usr/include"
-
-  cflags, = preserving_globals {
-    pkg_config('libiconv')
-  }
-  if cflags
-    cflags.shellsplit.each { |arg|
-      arg.sub!(/\A-I/, '') and
-      yield arg
-    }
+  if have_iconv?
+    return ['--with-iconv=yes']
   end
 
-  nil
-end
+  if (config = preserving_globals { pkg_config('libiconv') }) &&
+     have_iconv?('pkg-config libiconv') { pkg_config('libiconv') }
+    cflags, ldflags, libs = config
 
-def iconv_prefix
-  # Make sure libxml2 is built with iconv
-  each_iconv_idir { |idir|
-    next unless File.file?(File.join(idir, 'iconv.h'))
+    return [
+      '--with-iconv=yes',
+      "CPPFLAGS=#{cflags}".quote,
+      "LDFLAGS=#{ldflags}".quote,
+      "LIBS=#{libs}".quote,
+    ]
+  end
 
-    prefix, dir = File.split(idir)
-    next unless dir == 'include'
-
-    preserving_globals {
-      # Follow the way libxml2's configure uses a value given with
-      # --with-iconv[=DIR]
-      $CPPFLAGS = "-I#{idir}".quote << ' ' << $CPPFLAGS
-      $LIBPATH.unshift(File.join(prefix, "lib"))
-      have_iconv?
-    } and break prefix
-  } or asplode "libiconv"
+  asplode "libiconv"
 end
 
 def process_recipe(name, version, static_p, cross_p)
@@ -208,25 +231,31 @@ def process_recipe(name, version, static_p, cross_p)
       "#{key}=#{value}".shellescape
     }
 
-    if recipe.patch_files.empty?
-      message! "Building #{name}-#{version} for nokogiri.\n"
-    else
-      message! "Building #{name}-#{version} for nokogiri with the following patches applied:\n"
+    message <<-"EOS"
+************************************************************************
+IMPORTANT NOTICE:
+
+Building Nokogiri with a packaged version of #{name}-#{version}#{'.' if recipe.patch_files.empty?}
+    EOS
+
+    unless recipe.patch_files.empty?
+      message "with the following patches applied:\n"
 
       recipe.patch_files.each { |patch|
-        message! "\t- %s\n" % File.basename(patch)
+        message "\t- %s\n" % File.basename(patch)
       }
     end
 
-    message! <<-"EOS"
-************************************************************************
-IMPORTANT!  Nokogiri builds and uses a packaged version of #{name}.
+    message <<-"EOS"
 
-If this is a concern for you and you want to use the system library
-instead, abort this installation process and reinstall nokogiri as
-follows:
+Team Nokogiri will keep on doing their best to provide security
+updates in a timely manner, but if this is a concern for you and want
+to use the system library instead; abort this installation process and
+reinstall nokogiri as follows:
 
     gem install nokogiri -- --use-system-libraries
+        [--with-xml2-config=/path/to/xml2-config]
+        [--with-xslt-config=/path/to/xslt-config]
 
 If you are using Bundler, tell it to use the option:
 
@@ -234,17 +263,13 @@ If you are using Bundler, tell it to use the option:
     bundle install
     EOS
 
-    message! <<-"EOS" if name == 'libxml2'
+    message <<-"EOS" if name == 'libxml2'
 
-However, note that nokogiri does not necessarily support all versions
-of libxml2.
-
-For example, libxml2-2.9.0 and higher are currently known to be broken
-and thus unsupported by nokogiri, due to compatibility problems and
-XPath optimization bugs.
+Note, however, that nokogiri is not fully compatible with arbitrary
+versions of libxml2 provided by OS/package vendors.
     EOS
 
-    message! <<-"EOS"
+    message <<-"EOS"
 ************************************************************************
     EOS
 
@@ -264,6 +289,10 @@ def lib_a(ldflag)
   end
 end
 
+def using_system_libraries?
+  arg_config('--use-system-libraries', !!ENV['NOKOGIRI_USE_SYSTEM_LIBRARIES'])
+end
+
 #
 # monkey patches
 #
@@ -279,7 +308,7 @@ def monkey_patch_mini_portile
       @patch_files.each do |full_path|
         next unless File.exists?(full_path)
         output "Running patch with #{full_path}..."
-        execute('patch', %Q(patch -p1 < #{full_path}))
+        execute('patch', %Q(patch -p1 < "#{full_path}"))
       end
     end
   end
@@ -302,8 +331,10 @@ if defined?(RUBY_ENGINE) && RUBY_ENGINE == 'macruby'
   $LIBRUBYARG_STATIC.gsub!(/-static/, '')
 end
 
-$CFLAGS << " #{ENV["CFLAGS"]}"
 $LIBS << " #{ENV["LIBS"]}"
+
+# Read CFLAGS from ENV and make sure compiling works.
+add_cflags(ENV["CFLAGS"])
 
 case RbConfig::CONFIG['target_os']
 when 'mingw32', /mswin/
@@ -312,9 +343,9 @@ when 'mingw32', /mswin/
 when /solaris/
   $CFLAGS << " -DUSE_INCLUDED_VASPRINTF"
 when /darwin/
-  if RbConfig::MAKEFILE_CONFIG['CC'] !~ /gcc/ then
-    $CFLAGS << " -Wno-error=unused-command-line-argument-hard-error-in-future"
-  end
+  darwin_p = true
+  # Let Apple LLVM/clang 5.1 ignore unknown compiler flags
+  add_cflags("-Wno-error=unused-command-line-argument-hard-error-in-future")
 else
   $CFLAGS << " -g -DXP_UNIX"
 end
@@ -331,8 +362,8 @@ if RbConfig::MAKEFILE_CONFIG['CC'] =~ /gcc/
 end
 
 case
-when arg_config('--use-system-libraries', !!ENV['NOKOGIRI_USE_SYSTEM_LIBRARIES'])
-  message! "Building nokogiri using system libraries.\n"
+when using_system_libraries?
+  message "Building nokogiri using system libraries.\n"
 
   dir_config('zlib')
 
@@ -347,26 +378,26 @@ when arg_config('--use-system-libraries', !!ENV['NOKOGIRI_USE_SYSTEM_LIBRARIES']
 #include <libxml/xmlversion.h>
 
 #if LIBXML_VERSION < 20621
+#error libxml2 is way too old
+#endif
+  SRC
+
+  try_cpp(<<-SRC) or warn "libxml2 version 2.9.2 or later is highly recommended, but proceeding anyway."
+#include <libxml/xmlversion.h>
+
+#if LIBXML_VERSION < 20902
 #error libxml2 is too old
 #endif
   SRC
-
-  try_cpp(<<-SRC) or warn "libxml2 version 2.9.0 and later is not yet supported, but proceeding anyway."
-#include <libxml/xmlversion.h>
-
-#if LIBXML_VERSION >= 20900
-#error libxml2 is too new
-#endif
-  SRC
 else
-  message! "Building nokogiri using packaged libraries.\n"
+  message "Building nokogiri using packaged libraries.\n"
 
   require 'mini_portile'
   monkey_patch_mini_portile
   require 'yaml'
 
   static_p = enable_config('static', true) or
-    message! "Static linking is disabled.\n"
+    message "Static linking is disabled.\n"
 
   dir_config('zlib')
 
@@ -418,6 +449,27 @@ else
         "LDFLAGS="
       ]
     end
+  else
+    if darwin_p && !File.exist?('/usr/include/iconv.h')
+      abort <<'EOM'.chomp
+-----
+The file "/usr/include/iconv.h" is missing in your build environment,
+which means you haven't installed Xcode Command Line Tools properly.
+
+To install Command Line Tools, try running `xcode-select --install` on
+terminal and follow the instructions.  If it fails, open Xcode.app,
+select from the menu "Xcode" - "Open Developer Tool" - "More Developer
+Tools" to open the developer site, download the installer for your OS
+version and run it.
+-----
+EOM
+    end
+  end
+
+  unless windows_p
+    preserving_globals {
+      have_library('z', 'gzdopen', 'zlib.h')
+    } or abort 'zlib is missing; necessary for building libxml2'
   end
 
   libxml2_recipe = process_recipe("libxml2", dependencies["libxml2"], static_p, cross_build_p) do |recipe|
@@ -425,7 +477,7 @@ else
     recipe.configure_options += [
       "--without-python",
       "--without-readline",
-      "--with-iconv=#{libiconv_recipe ? libiconv_recipe.path : iconv_prefix}",
+      *(libiconv_recipe ? "--with-iconv=#{libiconv_recipe.path}" : iconv_configure_flags),
       "--with-c14n",
       "--with-debug",
       "--with-threads"
@@ -475,6 +527,7 @@ else
 
       # Defining a macro that expands to a C string; double quotes are significant.
       $CPPFLAGS << ' ' << "-DNOKOGIRI_#{recipe.name.upcase}_PATH=\"#{recipe.path}\"".shellescape
+      $CPPFLAGS << ' ' << "-DNOKOGIRI_#{recipe.name.upcase}_PATCHES=\"#{recipe.patch_files.map { |path| File.basename(path) }.join(' ')}\"".shellescape
 
       case libname
       when 'xml2'
