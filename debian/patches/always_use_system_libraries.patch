@@ -4,56 +4,16 @@ Origin: vendor
 Forwarded: not-needed
 Last-Update: 2014-07-25
 
---- a/Rakefile
-+++ b/Rakefile
-@@ -130,16 +130,6 @@
-     # GENERATED_TOKENIZER
-   ]
- 
--  unless java?
--    self.extra_deps += [
--      # this dependency locked because we're monkey-punching mini_portile.
--      # for more details, see:
--      # - https://github.com/sparklemotion/nokogiri/issues/1102
--      # - https://github.com/luislavena/mini_portile/issues/32
--      ["mini_portile",    "= 0.6.0"],
--    ]
--  end
--
-   self.extra_dev_deps += [
-     ["hoe-bundler",     ">= 1.1"],
-     ["hoe-debugging",   ">= 1.0.3"],
---- a/ext/nokogiri/extconf.rb
-+++ b/ext/nokogiri/extconf.rb
-@@ -331,7 +331,7 @@
+Index: ruby-nokogiri/ext/nokogiri/extconf.rb
+===================================================================
+--- ruby-nokogiri.orig/ext/nokogiri/extconf.rb
++++ ruby-nokogiri/ext/nokogiri/extconf.rb
+@@ -290,7 +290,7 @@ def lib_a(ldflag)
  end
  
- case
--when arg_config('--use-system-libraries', !!ENV['NOKOGIRI_USE_SYSTEM_LIBRARIES'])
-+when arg_config('--use-system-libraries', !!ENV['NOKOGIRI_USE_SYSTEM_LIBRARIES']) || true
-   message! "Building nokogiri using system libraries.\n"
+ def using_system_libraries?
+-  arg_config('--use-system-libraries', !!ENV['NOKOGIRI_USE_SYSTEM_LIBRARIES'])
++  arg_config('--use-system-libraries', !!ENV['NOKOGIRI_USE_SYSTEM_LIBRARIES']) || true
+ end
  
-   dir_config('zlib')
---- a/metadata.yml
-+++ b/metadata.yml
-@@ -15,20 +15,6 @@
- date: 2014-07-22 00:00:00.000000000 Z
- dependencies:
- - !ruby/object:Gem::Dependency
--  name: mini_portile
--  requirement: !ruby/object:Gem::Requirement
--    requirements:
--    - - '='
--      - !ruby/object:Gem::Version
--        version: 0.6.0
--  type: :runtime
--  prerelease: false
--  version_requirements: !ruby/object:Gem::Requirement
--    requirements:
--    - - '='
--      - !ruby/object:Gem::Version
--        version: 0.6.0
--- !ruby/object:Gem::Dependency
-   name: rdoc
-   requirement: !ruby/object:Gem::Requirement
-     requirements:
+ #
