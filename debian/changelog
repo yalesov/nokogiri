@@ -2,6 +2,8 @@ ruby-nokogiri (1.6.6.2+ds-1) UNRELEASED; urgency=low
 
   * Team upload.
   * New upstream release.
+  * Bump standards version to 3.9.6 (no changes).
+  * Refresh patches.
 
  -- Pirate Praveen <praveen@debian.org>  Tue, 31 Mar 2015 11:57:03 +0530
 
