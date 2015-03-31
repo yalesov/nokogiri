@@ -2,13 +2,15 @@ Description: Remove requirement on rubygems
 Origine: vendor
 ---
 This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
---- a/bin/nokogiri
-+++ b/bin/nokogiri
-@@ -3,7 +3,6 @@
+Index: ruby-nokogiri/bin/nokogiri
+===================================================================
+--- ruby-nokogiri.orig/bin/nokogiri
++++ ruby-nokogiri/bin/nokogiri
+@@ -2,7 +2,6 @@
+ require 'optparse'
  require 'open-uri'
- require 'irb'
  require 'uri'
 -require 'rubygems'
  require 'nokogiri'
+ autoload :IRB, 'irb'
  
- parse_class = Nokogiri
