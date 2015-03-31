@@ -54,7 +54,7 @@ module Nokogiri
         root << txt
         root << ent
         d << root
-        assert_match /&#8217;/, d.to_html
+        assert_match(/&#8217;/, d.to_html)
       end
 
       def test_document_with_initial_space
@@ -366,14 +366,6 @@ module Nokogiri
         doc.prepend_child fragment
         assert_equal '/hello', doc.at('//hello').path
         assert_equal 'hello', doc.root.name
-      end
-
-      def test_prepend_child_fragment_with_multiple_nodes
-        doc = Nokogiri::XML::Document.new
-        fragment = doc.fragment('<hello /><goodbye />')
-        assert_raises(RuntimeError) do
-          doc.prepend_child fragment
-        end
       end
 
       def test_prepend_child_fragment_with_multiple_nodes
@@ -709,6 +701,26 @@ module Nokogiri
         assert_equal 0, ns.length
       end
 
+      def test_document_search_with_multiple_queries
+        xml = '<document>
+                 <thing>
+                   <div class="title">important thing</div>
+                 </thing>
+                 <thing>
+                   <div class="content">stuff</div>
+                 </thing>
+                 <thing>
+                   <p class="blah">more stuff</div>
+                 </thing>
+               </document>'
+        document = Nokogiri::XML(xml)
+        assert_kind_of Nokogiri::XML::Document, document
+
+        assert_equal 3, document.xpath('.//div', './/p').length
+        assert_equal 3, document.css('.title', '.content', 'p').length
+        assert_equal 3, document.search('.//div', 'p.blah').length
+      end
+
       def test_bad_xpath_raises_syntax_error
         assert_raises(XML::XPath::SyntaxError) {
           @xml.xpath('\\')
@@ -840,6 +852,13 @@ module Nokogiri
         assert_equal 1, doc.xpath("//a:foo").length
         assert_equal 1, doc.xpath("//x:foo", "x" => "http://c.flavorjon.es/").length
         assert_match %r{foo c:attr}, doc.to_xml
+        doc.at_xpath("//x:foo", "x" => "http://c.flavorjon.es/").tap do |node|
+          assert_equal nil,          node["attr"]
+          assert_equal "attr-value", node["c:attr"]
+          assert_equal nil,          node.attribute_with_ns("attr", nil)
+          assert_equal "attr-value", node.attribute_with_ns("attr", "http://c.flavorjon.es/").value
+          assert_equal "attr-value", node.attributes["attr"].value
+        end
 
         doc.remove_namespaces!
 
@@ -850,6 +869,13 @@ module Nokogiri
         assert_equal 0, doc.xpath("//a:foo", namespaces).length
         assert_equal 0, doc.xpath("//x:foo", "x" => "http://c.flavorjon.es/").length
         assert_match %r{foo attr}, doc.to_xml
+        doc.at_xpath("//container/foo").tap do |node|
+          assert_equal "attr-value", node["attr"]
+          assert_equal nil,          node["c:attr"]
+          assert_equal "attr-value", node.attribute_with_ns("attr", nil).value
+          assert_equal nil,          node.attribute_with_ns("attr", "http://c.flavorjon.es/")
+          assert_equal "attr-value", node.attributes["attr"].value # doesn't change!
+        end
       end
 
       # issue #785

@@ -317,21 +317,29 @@ static VALUE read_memory( VALUE klass,
  * Copy this Document.  An optional depth may be passed in, but it defaults
  * to a deep copy.  0 is a shallow copy, 1 is a deep copy.
  */
-static VALUE duplicate_node(int argc, VALUE *argv, VALUE self)
+static VALUE duplicate_document(int argc, VALUE *argv, VALUE self)
 {
   xmlDocPtr doc, dup;
+  VALUE copy;
   VALUE level;
+  VALUE error_list      = rb_ary_new();
 
   if(rb_scan_args(argc, argv, "01", &level) == 0)
     level = INT2NUM((long)1);
 
   Data_Get_Struct(self, xmlDoc, doc);
 
+  xmlResetLastError();
+  xmlSetStructuredErrorFunc((void *)error_list, Nokogiri_error_array_pusher);
   dup = xmlCopyDoc(doc, (int)NUM2INT(level));
+  xmlSetStructuredErrorFunc(NULL, NULL);
+
   if(dup == NULL) return Qnil;
 
   dup->type = doc->type;
-  return Nokogiri_wrap_xml_document(rb_obj_class(self), dup);
+  copy = Nokogiri_wrap_xml_document(rb_obj_class(self), dup);
+  rb_iv_set(copy, "@errors", error_list);
+  return copy ;
 }
 
 /*
@@ -566,7 +574,7 @@ void init_xml_document()
   rb_define_method(klass, "encoding=", set_encoding, 1);
   rb_define_method(klass, "version", version, 0);
   rb_define_method(klass, "canonicalize", canonicalize, -1);
-  rb_define_method(klass, "dup", duplicate_node, -1);
+  rb_define_method(klass, "dup", duplicate_document, -1);
   rb_define_method(klass, "url", url, 0);
   rb_define_method(klass, "create_entity", create_entity, -1);
   rb_define_method(klass, "remove_namespaces!", remove_namespaces_bang, 0);

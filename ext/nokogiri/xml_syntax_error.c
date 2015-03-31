@@ -3,7 +3,12 @@
 void Nokogiri_error_array_pusher(void * ctx, xmlErrorPtr error)
 {
   VALUE list = (VALUE)ctx;
+  Check_Type(list, T_ARRAY);
   rb_ary_push(list,  Nokogiri_wrap_xml_syntax_error(error));
+}
+
+void Nokogiri_error_silencer(void * ctx, xmlErrorPtr error)
+{
 }
 
 void Nokogiri_error_raise(void * ctx, xmlErrorPtr error)
@@ -17,7 +22,7 @@ VALUE Nokogiri_wrap_xml_syntax_error(xmlErrorPtr error)
 
   klass = cNokogiriXmlSyntaxError;
 
-  if (error->domain == XML_FROM_XPATH) {
+  if (error && error->domain == XML_FROM_XPATH) {
     VALUE xpath = rb_const_get(mNokogiriXml, rb_intern("XPath"));
     klass = rb_const_get(xpath, rb_intern("SyntaxError"));
   }

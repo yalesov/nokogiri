@@ -221,7 +221,7 @@ eohtml
         title = doc.at('/html/head/title')
         assert_not_nil title
         assert_equal 'new', title.text
-        assert_equal -1, doc.at('meta[@http-equiv]') <=> title
+        assert_equal(-1, doc.at('meta[@http-equiv]') <=> title)
 
         doc = Nokogiri::HTML(<<eohtml)
 <html>
@@ -236,7 +236,7 @@ eohtml
         title = doc.at('/html//title')
         assert_not_nil title
         assert_equal 'new', title.text
-        assert_equal -1, title <=> doc.at('body')
+        assert_equal(-1, title <=> doc.at('body'))
 
         doc = Nokogiri::HTML(<<eohtml)
 <html>
@@ -248,14 +248,14 @@ eohtml
 eohtml
         doc.title = 'new'
         assert_equal 'new', doc.title
-        assert_equal -1, doc.at('meta[@charset]') <=> doc.at('title')
-        assert_equal -1, doc.at('title') <=> doc.at('body')
+        assert_equal(-1, doc.at('meta[@charset]') <=> doc.at('title'))
+        assert_equal(-1, doc.at('title') <=> doc.at('body'))
 
         doc = Nokogiri::HTML('<!DOCTYPE html><p>hello')
         doc.title = 'new'
         assert_equal 'new', doc.title
         assert_instance_of Nokogiri::XML::DTD, doc.children.first
-        assert_equal -1, doc.at('title') <=> doc.at('p')
+        assert_equal(-1, doc.at('title') <=> doc.at('p'))
 
         doc = Nokogiri::HTML('')
         doc.title = 'new'
@@ -355,7 +355,7 @@ eohtml
         File.open(HTML_FILE, 'rb') { |f| temp_html_file.write f.read }
         temp_html_file.close
         temp_html_file.open
-        assert_equal Nokogiri::HTML.parse(File.read(HTML_FILE)).xpath('//div/a').length, 
+        assert_equal Nokogiri::HTML.parse(File.read(HTML_FILE)).xpath('//div/a').length,
           Nokogiri::HTML.parse(temp_html_file).xpath('//div/a').length
       end
 
@@ -450,10 +450,9 @@ eohtml
         assert_equal "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd", html.internal_subset.system_id
         assert_equal "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">", html.to_s[0,97]
       end
-      
+
       def test_content_size
-        html = Nokogiri::HTML('<div>
-</div>')
+        html = Nokogiri::HTML("<div>\n</div>")
         assert_equal 1, html.content.size
         assert_equal 1, html.content.split("").size
         assert_equal "\n", html.content
@@ -520,7 +519,7 @@ eohtml
       end
 
       def test_inner_html
-        html = Nokogiri::HTML(<<-eohtml)
+        html = Nokogiri::HTML <<-EOHTML
         <html>
           <body>
             <div>
@@ -530,9 +529,9 @@ eohtml
             </div>
           </body>
         </html>
-        eohtml
-        node = html.xpath('//div').first
-        assert_equal('<p>Helloworld!</p>', node.inner_html.gsub(/\s/, ''))
+        EOHTML
+        node = html.xpath("//div").first
+        assert_equal("<p>Helloworld!</p>", node.inner_html.gsub(%r{\s}, ""))
       end
 
       def test_round_trip
@@ -613,7 +612,31 @@ eohtml
         assert_equal "", Nokogiri::HTML.parse(nil).text
         assert_equal "", Nokogiri::HTML.parse("").text
       end
+
+      def test_capturing_nonparse_errors_during_document_clone
+        # see https://github.com/sparklemotion/nokogiri/issues/1196 for background
+        original = Nokogiri::HTML.parse("<div id='unique'></div><div id='unique'></div>")
+        original_errors = original.errors.dup
+
+        copy = original.dup
+        assert_equal original_errors, copy.errors
+      end
+
+      def test_capturing_nonparse_errors_during_node_copy_between_docs
+        skip("JRuby HTML parse errors are different than libxml2's") if Nokogiri.jruby?
+
+        doc1 = Nokogiri::HTML("<div id='unique'>one</div>")
+        doc2 = Nokogiri::HTML("<div id='unique'>two</div>")
+        node1 = doc1.at_css("#unique")
+        node2 = doc2.at_css("#unique")
+
+        original_errors = doc1.errors.dup
+
+        node1.add_child node2
+
+        assert_equal original_errors.length+1, doc1.errors.length
+        assert_match(/ID unique already defined/, doc1.errors.last.to_s)
+      end
     end
   end
 end
-
