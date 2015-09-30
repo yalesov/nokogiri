@@ -39,6 +39,12 @@ import nokogiri.XmlDocument;
 import org.apache.xerces.parsers.DOMParser;
 import org.apache.xerces.parsers.XIncludeParserConfiguration;
 import org.apache.xerces.xni.parser.XMLParserConfiguration;
+import org.apache.xerces.xni.XMLLocator;
+import org.apache.xerces.xni.NamespaceContext;
+import org.apache.xerces.xni.Augmentations;
+import org.apache.xerces.xni.QName;
+import org.apache.xerces.xni.XMLAttributes;
+import org.apache.xerces.xni.Augmentations;
 import org.cyberneko.dtd.DTDConfiguration;
 import org.w3c.dom.Document;
 import org.xml.sax.Attributes;
@@ -57,6 +63,7 @@ public class NokogiriDomParser extends DOMParser {
     protected DOMParser dtd;
     protected boolean xInclude;
     protected XMLParserConfiguration config;
+    protected XMLLocator locator;
 
     public NokogiriDomParser(XMLParserConfiguration config) {
         super(config);
@@ -112,5 +119,22 @@ public class NokogiriDomParser extends DOMParser {
             if (publicId != null) source.setPublicId(publicId);
             return source;
         }
+    }
+
+    @Override
+    public void startDocument(XMLLocator locator,
+                              String encoding,
+                              NamespaceContext namespaceContext,
+                              Augmentations augs) {
+        this.locator = locator;
+        super.startDocument(locator, encoding, namespaceContext, augs);
+    }
+
+    @Override
+    public void startElement(QName element,
+                             XMLAttributes attributes,
+                             Augmentations augs) {
+        System.out.println(element + ": " + locator.getLineNumber());
+        super.startElement(element, attributes, augs);
     }
 }
